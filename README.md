@@ -530,6 +530,39 @@ let photo = classToPlain(photo, { strategy: "excludeAll" });
 
 In this case you don't need to `@Exclude()` a whole class.
 
+## Exposing/Excluding properties of subobjects
+
+By default, setting a strategy or using Exclude/Expose decorators will set the strategy deeply,
+so subobjects need to specifically expose properties too.
+If you use plain subobjects which shall not be stripped, use the nestedStrategy configuration property.
+
+```typescript
+import {Exclude, Expose, classToPlain} from "class-transformer";
+
+interface DataInterface {
+	prop:string,
+	otherProp:number
+}
+
+export class User {
+    @Expose()
+    id: number;
+    @Expose()
+    data: DataInterface;
+}
+
+
+const user = new User();
+user.id = 3;
+user.data = {prop:'test',otherProp:23};
+
+// plain1.data will be an empty object
+let plain1 = classToPlain(user, { strategy:"excludeAll" });
+
+// plain2.data will be {prop:'test',otherProp:23}
+let plain2 = classToPlain(user, { strategy:"excludeAll", nestedStrategy:"exposeAll" });
+```
+
 ## Skipping private properties, or some prefixed properties
 
 If you name your private properties with a prefix, lets say with `_`,

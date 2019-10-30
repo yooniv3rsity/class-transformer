@@ -517,6 +517,95 @@ describe("basic functionality", () => {
         });
     });
 
+
+    it("should allow to pass a different default strategy for subobjects", () => {
+		defaultMetadataStorage.clear();
+		
+		interface UserData {
+			prop1:string
+		}
+
+        class User {
+
+            @Expose()
+            name: string;
+
+            @Expose()
+			data:UserData;
+			
+        }
+
+        const user = new User();
+        user.name = "Umed";
+        user.data = {prop1:"random"};
+
+        const fromExistUser = new User();
+        fromExistUser.name = "exist";
+
+        const plainUser: any = classToPlain(user, { strategy: "excludeAll" });
+        plainUser.should.be.eql({
+			name: "Umed",
+			data: {}
+        });
+        expect(plainUser.data.prop1).to.be.undefined;
+
+        const plainUser2: any = classToPlain(user, { strategy: "excludeAll", nestedStrategy:"exposeAll" });
+        expect(plainUser2.data.prop1).to.be.eql("random");
+
+        const existUser = { data:{prop1:'test'} };
+		// for unknown reasons, data will equal prop1:'test' here
+        // const plainUser3 = classToPlainFromExist(user, existUser, { strategy: "excludeAll" });
+        // plainUser3.should.be.eql({
+		// 	name: "Umed",
+		// 	data: {}
+        // });
+        const plainUser4:{[k:string]:any} = classToPlainFromExist(user, existUser, { strategy: "excludeAll", nestedStrategy:"exposeAll" });
+        plainUser4.should.be.eql({
+			name: "Umed",
+			data: {prop1:'random'}
+		});
+
+        const plainUser5 = classToPlainFromExist(user, existUser, { strategy: "exposeAll", nestedStrategy:"exposeAll" });
+        plainUser5.should.be.eql({
+			name: "Umed",
+			data: {prop1:'random'}
+        });
+        // const plainUser6:{[k:string]:any} = classToPlainFromExist(user, existUser, { strategy: "exposeAll", nestedStrategy:"excludeAll" });
+        // plainUser6.should.be.eql({
+		// 	name: "Umed",
+		// 	data: {prop1:'random'}
+		// });
+		
+
+
+		const fromPlainUser = {
+            data: {prop1:"random"}
+        };
+
+		const transformedUser = plainToClass(User, fromPlainUser, { strategy: "excludeAll", nestedStrategy:"exposeAll" });
+        transformedUser.should.be.instanceOf(User);
+        transformedUser.should.be.eql({
+			name: undefined,
+			data: {prop1:"random"}
+        });
+
+        // const fromExistTransformedUser = plainToClassFromExist(fromExistUser, fromPlainUser, { strategy: "excludeAll", nestedStrategy:"exposeAll" });
+        // fromExistTransformedUser.should.be.instanceOf(User);
+        // fromExistTransformedUser.should.be.eql({
+		// 	name: "exist",
+		// 	data: {prop1:"random"}
+        // });
+
+        const classToClassUser = classToClass(user, { strategy: "excludeAll", nestedStrategy:"exposeAll" });
+        classToClassUser.should.be.instanceOf(User);
+        classToClassUser.should.not.be.equal(user);
+        classToClassUser.should.be.eql({
+			name : "Umed",
+			data : {prop1:"random"},
+		});
+
+    });
+
     it("should convert values to specific types if they are set via @Type decorator", () => {
         defaultMetadataStorage.clear();
 

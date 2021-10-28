@@ -15,7 +15,7 @@ export function Expose(options: ExposeOptions = {}): PropertyDecorator & ClassDe
    * Typescript compiler will freak out if we make it mandatory as a class
    * decorator only receives one parameter.
    */
-  return function (object: any, propertyName?: string | Symbol): void {
+  return function(object: any, propertyName?: string | Symbol): void {
     defaultMetadataStorage.addExposeMetadata({
       target: object instanceof Function ? object : object.constructor,
       propertyName: propertyName as string,

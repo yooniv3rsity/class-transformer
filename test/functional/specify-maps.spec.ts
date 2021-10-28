@@ -1594,10 +1594,7 @@ describe('specifying target maps', () => {
       },
     ];
 
-    const existUsers = [
-      { id: 1, age: 27 },
-      { id: 2, age: 30 },
-    ];
+    const existUsers = [{ id: 1, age: 27 }, { id: 2, age: 30 }];
     const plainUser2 = classToPlainFromExist(users, existUsers);
     expect(plainUser2).toEqual([
       {

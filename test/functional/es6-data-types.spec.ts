@@ -206,11 +206,7 @@ describe('es6 data types', () => {
     const plainUser = {
       id: 1,
       name: 'Max Pain',
-      weapons: [
-        { model: 'knife', range: 1 },
-        { model: 'eagle', range: 200 },
-        { model: 'ak-47', range: 800 },
-      ],
+      weapons: [{ model: 'knife', range: 1 }, { model: 'eagle', range: 200 }, { model: 'ak-47', range: 800 }],
     };
 
     const weapons = new Set<Weapon>();
@@ -245,11 +241,7 @@ describe('es6 data types', () => {
     expect(plainedUser).toEqual({
       id: 1,
       name: 'Max Pain',
-      weapons: [
-        { model: 'knife', range: 1 },
-        { model: 'eagle', range: 200 },
-        { model: 'ak-47', range: 800 },
-      ],
+      weapons: [{ model: 'knife', range: 1 }, { model: 'eagle', range: 200 }, { model: 'ak-47', range: 800 }],
     });
   });
 

@@ -1,16 +1,13 @@
-# class-transformer
+> **IMPORTANT NOTE!**
+>
+> This repository is a fork of the original [`class-transformer`](https://github.com/typestack/class-transformer) package.
 
-![Build Status](https://github.com/typestack/class-transformer/workflows/CI/badge.svg)
-[![codecov](https://codecov.io/gh/typestack/class-transformer/branch/develop/graph/badge.svg)](https://codecov.io/gh/typestack/class-transformer)
-[![npm version](https://badge.fury.io/js/class-transformer.svg)](https://badge.fury.io/js/class-transformer)
+# class-transformer
 
 Its ES6 and Typescript era. Nowadays you are working with classes and constructor objects more than ever.
 Class-transformer allows you to transform plain object to some instance of class and versa.
 Also it allows to serialize / deserialize object based on criteria.
 This tool is super useful on both frontend and backend.
-
-Example how to use with angular 2 in [plunker](http://plnkr.co/edit/Mja1ZYAjVySWASMHVB9R).
-Source code is available [here](https://github.com/pleerock/class-transformer-demo).
 
 ## Table of contents
 
@@ -839,7 +836,7 @@ the exposed variables. email property is also exposed because we metioned the gr
 Generics are not supported because TypeScript does not have good reflection abilities yet.
 Once TypeScript team provide us better runtime type reflection tools, generics will be implemented.
 There are some tweaks however you can use, that maybe can solve your problem.
-[Checkout this example.](https://github.com/pleerock/class-transformer/tree/master/sample/sample4-generics)
+[Checkout this example.](https://github.com/nestjs/class-transformer/tree/master/sample/sample4-generics)
 
 ## Implicit type conversion[⬆](#table-of-contents)
 
@@ -891,13 +888,12 @@ this.http
 You can also inject a class `ClassTransformer` as a service in `providers`, and use its methods.
 
 Example how to use with angular 2 in [plunker](http://plnkr.co/edit/Mja1ZYAjVySWASMHVB9R).
-Source code is [here](https://github.com/pleerock/class-transformer-demo).
 
 ## Samples[⬆](#table-of-contents)
 
-Take a look on samples in [./sample](https://github.com/pleerock/class-transformer/tree/master/sample) for more examples of
+Take a look on samples in [./sample](https://github.com/nestjs/class-transformer/tree/master/sample) for more examples of
 usages.
 
 ## Release notes[⬆](#table-of-contents)
 
-See information about breaking changes and release notes [here](https://github.com/typestack/class-transformer/blob/master/CHANGELOG.md).
+See information about breaking changes and release notes [here](https://github.com/nestjs/class-transformer/blob/master/CHANGELOG.md).

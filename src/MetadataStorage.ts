@@ -33,7 +33,10 @@ export class MetadataStorage {
     if (!this._transformMetadatas.get(metadata.target).has(metadata.propertyName)) {
       this._transformMetadatas.get(metadata.target).set(metadata.propertyName, []);
     }
-    this._transformMetadatas.get(metadata.target).get(metadata.propertyName).push(metadata);
+    this._transformMetadatas
+      .get(metadata.target)
+      .get(metadata.propertyName)
+      .push(metadata);
   }
 
   addExposeMetadata(metadata: ExposeMetadata): void {

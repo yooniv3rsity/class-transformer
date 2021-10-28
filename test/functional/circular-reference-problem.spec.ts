@@ -131,7 +131,10 @@ describe('circular reference problem', () => {
     user.photos = [photo1];
 
     beforeEach(() => {
-      isCircularSpy = jest.spyOn(TransformOperationExecutor.prototype, 'isCircular' as any);
+      isCircularSpy = jest.spyOn(
+        TransformOperationExecutor.prototype,
+        'isCircular' as any
+      );
     });
 
     afterEach(() => {
@@ -144,7 +147,9 @@ describe('circular reference problem', () => {
     });
 
     it('enableCircularCheck option is true', () => {
-      plainToClass<User, Record<string, any>>(User, user, { enableCircularCheck: true });
+      plainToClass<User, Record<string, any>>(User, user, {
+        enableCircularCheck: true,
+      });
       expect(isCircularSpy).toHaveBeenCalled();
     });
   });

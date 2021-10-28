@@ -10,7 +10,7 @@ export function Transform(
   transformFn: (params: TransformFnParams) => any,
   options: TransformOptions = {}
 ): PropertyDecorator {
-  return function(target: any, propertyName: string | Symbol): void {
+  return function (target: any, propertyName: string | Symbol): void {
     defaultMetadataStorage.addTransformMetadata({
       target: target.constructor,
       propertyName: propertyName as string,

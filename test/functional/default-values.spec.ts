@@ -29,7 +29,9 @@ describe('expose default values', () => {
 
   it('should set default value if nothing provided', () => {
     const fromPlainUser = {};
-    const transformedUser = plainToClass(User, fromPlainUser, { exposeDefaultValues: true });
+    const transformedUser = plainToClass(User, fromPlainUser, {
+      exposeDefaultValues: true,
+    });
 
     expect(transformedUser).toBeInstanceOf(User);
     expect(transformedUser).toEqual({

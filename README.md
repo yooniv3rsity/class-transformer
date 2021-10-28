@@ -327,7 +327,9 @@ const fromPlainUser = {
   lastName: 'Khudoiberdiev',
 };
 
-console.log(plainToClass(User, fromPlainUser, { excludeExtraneousValues: true }));
+console.log(
+  plainToClass(User, fromPlainUser, { excludeExtraneousValues: true })
+);
 
 // User {
 //   id: undefined,
@@ -852,8 +854,16 @@ class MyPayload {
   prop: string;
 }
 
-const result1 = plainToClass(MyPayload, { prop: 1234 }, { enableImplicitConversion: true });
-const result2 = plainToClass(MyPayload, { prop: 1234 }, { enableImplicitConversion: false });
+const result1 = plainToClass(
+  MyPayload,
+  { prop: 1234 },
+  { enableImplicitConversion: true }
+);
+const result2 = plainToClass(
+  MyPayload,
+  { prop: 1234 },
+  { enableImplicitConversion: false }
+);
 
 /**
  *  result1 will be `{ prop: "1234" }` - notice how the prop value has been converted to string.

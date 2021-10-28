@@ -206,7 +206,11 @@ describe('es6 data types', () => {
     const plainUser = {
       id: 1,
       name: 'Max Pain',
-      weapons: [{ model: 'knife', range: 1 }, { model: 'eagle', range: 200 }, { model: 'ak-47', range: 800 }],
+      weapons: [
+        { model: 'knife', range: 1 },
+        { model: 'eagle', range: 200 },
+        { model: 'ak-47', range: 800 },
+      ],
     };
 
     const weapons = new Set<Weapon>();
@@ -241,7 +245,11 @@ describe('es6 data types', () => {
     expect(plainedUser).toEqual({
       id: 1,
       name: 'Max Pain',
-      weapons: [{ model: 'knife', range: 1 }, { model: 'eagle', range: 200 }, { model: 'ak-47', range: 800 }],
+      weapons: [
+        { model: 'knife', range: 1 },
+        { model: 'eagle', range: 200 },
+        { model: 'ak-47', range: 800 },
+      ],
     });
   });
 
@@ -332,10 +340,14 @@ describe('es6 data types', () => {
       });
     }
 
-    const classedUser = plainToClass(User, plainUser, { excludeExtraneousValues: false });
+    const classedUser = plainToClass(User, plainUser, {
+      excludeExtraneousValues: false,
+    });
     checkPlainToClassUser(classedUser);
 
-    const classedUser2 = plainToClass(User, plainUser, { excludeExtraneousValues: true });
+    const classedUser2 = plainToClass(User, plainUser, {
+      excludeExtraneousValues: true,
+    });
     checkPlainToClassUser(classedUser2);
   });
 });

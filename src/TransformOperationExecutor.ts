@@ -42,7 +42,7 @@ export class TransformOperationExecutor {
     targetType: Function | TypeMetadata,
     arrayType: Function,
     isMap: boolean,
-    level: number = 0
+    level = 0
   ): any {
     if (Array.isArray(value) || value instanceof Set) {
       const newValue =
@@ -88,11 +88,10 @@ export class TransformOperationExecutor {
               realTargetType = subValue.constructor;
             }
             if (this.transformationType === TransformationType.CLASS_TO_PLAIN) {
-              subValue[
-                targetType.options.discriminator.property
-              ] = targetType.options.discriminator.subTypes.find(
-                subType => subType.value === subValue.constructor
-              ).name;
+              subValue[targetType.options.discriminator.property] =
+                targetType.options.discriminator.subTypes.find(
+                  subType => subType.value === subValue.constructor
+                ).name;
             }
           } else {
             realTargetType = targetType;
@@ -212,10 +211,11 @@ export class TransformOperationExecutor {
           propertyName = key;
         if (!this.options.ignoreDecorators && targetType) {
           if (this.transformationType === TransformationType.PLAIN_TO_CLASS) {
-            const exposeMetadata = defaultMetadataStorage.findExposeMetadataByCustomName(
-              targetType as Function,
-              key
-            );
+            const exposeMetadata =
+              defaultMetadataStorage.findExposeMetadataByCustomName(
+                targetType as Function,
+                key
+              );
             if (exposeMetadata) {
               propertyName = exposeMetadata.propertyName;
               newValueKey = exposeMetadata.propertyName;
@@ -310,11 +310,10 @@ export class TransformOperationExecutor {
                 if (
                   this.transformationType === TransformationType.CLASS_TO_PLAIN
                 ) {
-                  subValue[
-                    metadata.options.discriminator.property
-                  ] = metadata.options.discriminator.subTypes.find(
-                    subType => subType.value === subValue.constructor
-                  ).name;
+                  subValue[metadata.options.discriminator.property] =
+                    metadata.options.discriminator.subTypes.find(
+                      subType => subType.value === subValue.constructor
+                    ).name;
                 }
               } else {
                 type = metadata;

@@ -5,6 +5,11 @@
 This fork uses `global` scope for caching metadata information. This allows importing this package
 from multiple locations, but might cause problems if multiple versions are installed at the same time.\_
 
+### Publishing
+
+- On PR, builds and tests will be executed
+- when creating a tagged release, CD workflow will publish to NPM
+
 ## yoolabs class-transformer
 
 This fork adds custom functionality to class transformer.

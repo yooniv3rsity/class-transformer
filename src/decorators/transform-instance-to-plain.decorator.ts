@@ -6,7 +6,7 @@ import { ClassTransformOptions } from '../interfaces';
  *
  * Can be applied to functions and getters/setters only.
  */
-export function TransformClassToPlain(
+export function TransformInstanceToPlain(
   params?: ClassTransformOptions
 ): MethodDecorator {
   return function (
@@ -25,9 +25,9 @@ export function TransformClassToPlain(
         typeof result.then === 'function';
       return isPromise
         ? result.then((data: any) =>
-            classTransformer.classToPlain(data, params)
+            classTransformer.instanceToPlain(data, params)
           )
-        : classTransformer.classToPlain(result, params);
+        : classTransformer.instanceToPlain(result, params);
     };
   };
 }

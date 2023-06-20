@@ -1,14 +1,14 @@
 import 'reflect-metadata';
+import { Exclude, Expose, Type } from '../../src/decorators';
 import {
-  classToClass,
   classToClassFromExist,
-  classToPlain,
   classToPlainFromExist,
-  plainToClass,
+  instanceToInstance,
+  instanceToPlain,
   plainToClassFromExist,
+  plainToInstance,
 } from '../../src/index';
 import { defaultMetadataStorage } from '../../src/storage';
-import { Exclude, Expose, Type } from '../../src/decorators';
 
 describe('specifying target maps', () => {
   it('should convert instance of the given object to plain javascript object and should expose all properties since its a default behaviour', () => {
@@ -35,7 +35,7 @@ describe('specifying target maps', () => {
     const fromExistUser = new User();
     fromExistUser.id = 1;
 
-    const plainUser = classToPlain(user);
+    const plainUser = instanceToPlain(user);
     expect(plainUser).not.toBeInstanceOf(User);
     expect(plainUser).toEqual({
       firstName: 'Umed',
@@ -55,7 +55,7 @@ describe('specifying target maps', () => {
     });
     expect(plainUser2).toEqual(existUser);
 
-    const transformedUser = plainToClass(User, fromPlainUser);
+    const transformedUser = plainToInstance(User, fromPlainUser);
     expect(transformedUser).toBeInstanceOf(User);
     expect(transformedUser).toEqual({
       firstName: 'Umed',
@@ -75,7 +75,7 @@ describe('specifying target maps', () => {
       password: 'imnosuperman',
     });
 
-    const classToClassUser = classToClass(user);
+    const classToClassUser = instanceToInstance(user);
     expect(classToClassUser).toBeInstanceOf(User);
     expect(classToClassUser).not.toBe(user);
     expect(classToClassUser).toEqual({
@@ -124,7 +124,7 @@ describe('specifying target maps', () => {
     const fromExistUser = new User();
     fromExistUser.id = 1;
 
-    const plainUser: any = classToPlain(user);
+    const plainUser: any = instanceToPlain(user);
     expect(plainUser).not.toBeInstanceOf(User);
     expect(plainUser).toEqual({
       firstName: 'Umed',
@@ -144,7 +144,7 @@ describe('specifying target maps', () => {
     });
     expect(plainUser2).toEqual(existUser);
 
-    const transformedUser = plainToClass(User, fromPlainUser);
+    const transformedUser = plainToInstance(User, fromPlainUser);
     expect(transformedUser).toBeInstanceOf(User);
     expect(transformedUser).toEqual({
       firstName: 'Umed',
@@ -162,7 +162,7 @@ describe('specifying target maps', () => {
       lastName: 'Khudoiberdiev',
     });
 
-    const classToClassUser = classToClass(user);
+    const classToClassUser = instanceToInstance(user);
     expect(classToClassUser).toBeInstanceOf(User);
     expect(classToClassUser).not.toEqual(user);
     expect(classToClassUser).toEqual({
@@ -209,7 +209,7 @@ describe('specifying target maps', () => {
     const fromExistUser = new User();
     fromExistUser.id = 1;
 
-    const plainUser: any = classToPlain(user);
+    const plainUser: any = instanceToPlain(user);
     expect(plainUser).not.toBeInstanceOf(User);
     expect(plainUser).toEqual({});
     expect(plainUser.firstName).toBeUndefined();
@@ -225,7 +225,7 @@ describe('specifying target maps', () => {
     });
     expect(plainUser2).toEqual(existUser);
 
-    const transformedUser = plainToClass(User, fromPlainUser);
+    const transformedUser = plainToInstance(User, fromPlainUser);
     expect(transformedUser).toBeInstanceOf(User);
     expect(transformedUser).toEqual({});
 
@@ -238,7 +238,7 @@ describe('specifying target maps', () => {
       id: 1,
     });
 
-    const classToClassUser = classToClass(user);
+    const classToClassUser = instanceToInstance(user);
     expect(classToClassUser).toBeInstanceOf(User);
     expect(classToClassUser).not.toEqual(user);
     expect(classToClassUser).toEqual({});
@@ -285,7 +285,7 @@ describe('specifying target maps', () => {
     const fromExistUser = new User();
     fromExistUser.id = 1;
 
-    const plainUser: any = classToPlain(user);
+    const plainUser: any = instanceToPlain(user);
     expect(plainUser).not.toBeInstanceOf(User);
     expect(plainUser).toEqual({
       firstName: 'Umed',
@@ -304,7 +304,7 @@ describe('specifying target maps', () => {
     });
     expect(plainUser2).toEqual(existUser);
 
-    const transformedUser = plainToClass(User, fromPlainUser);
+    const transformedUser = plainToInstance(User, fromPlainUser);
     expect(transformedUser).toBeInstanceOf(User);
     expect(transformedUser).toEqual({
       firstName: 'Umed',
@@ -322,7 +322,7 @@ describe('specifying target maps', () => {
       lastName: 'Khudoiberdiev',
     });
 
-    const classToClassUser = classToClass(user);
+    const classToClassUser = instanceToInstance(user);
     expect(classToClassUser).toBeInstanceOf(User);
     expect(classToClassUser).not.toEqual(user);
     expect(classToClassUser).toEqual({
@@ -373,7 +373,7 @@ describe('specifying target maps', () => {
     const fromExistUser = new User();
     fromExistUser.id = 1;
 
-    const plainUser: any = classToPlain(user, { strategy: 'excludeAll' });
+    const plainUser: any = instanceToPlain(user, { strategy: 'excludeAll' });
     expect(plainUser).not.toBeInstanceOf(User);
     expect(plainUser).toEqual({
       firstName: 'Umed',
@@ -394,7 +394,7 @@ describe('specifying target maps', () => {
     });
     expect(plainUser2).toEqual(existUser);
 
-    const transformedUser = plainToClass(User, fromPlainUser, {
+    const transformedUser = plainToInstance(User, fromPlainUser, {
       strategy: 'excludeAll',
     });
     expect(transformedUser).toBeInstanceOf(User);
@@ -415,7 +415,9 @@ describe('specifying target maps', () => {
       lastName: 'Khudoiberdiev',
     });
 
-    const classToClassUser = classToClass(user, { strategy: 'excludeAll' });
+    const classToClassUser = instanceToInstance(user, {
+      strategy: 'excludeAll',
+    });
     expect(classToClassUser).toBeInstanceOf(User);
     expect(classToClassUser).not.toEqual(user);
     expect(classToClassUser).toEqual({
@@ -466,7 +468,7 @@ describe('specifying target maps', () => {
     const fromExistUser = new User();
     fromExistUser.id = 1;
 
-    const plainUser: any = classToPlain(user, { strategy: 'exposeAll' });
+    const plainUser: any = instanceToPlain(user, { strategy: 'exposeAll' });
     expect(plainUser).not.toBeInstanceOf(User);
     expect(plainUser).toEqual({
       firstName: 'Umed',
@@ -486,7 +488,7 @@ describe('specifying target maps', () => {
     });
     expect(plainUser2).toEqual(existUser);
 
-    const transformedUser = plainToClass(User, fromPlainUser, {
+    const transformedUser = plainToInstance(User, fromPlainUser, {
       strategy: 'exposeAll',
     });
     expect(transformedUser).toBeInstanceOf(User);
@@ -505,7 +507,9 @@ describe('specifying target maps', () => {
       firstName: 'Umed',
     });
 
-    const classToClassUser = classToClass(user, { strategy: 'exposeAll' });
+    const classToClassUser = instanceToInstance(user, {
+      strategy: 'exposeAll',
+    });
     expect(classToClassUser).toBeInstanceOf(User);
     expect(classToClassUser).not.toEqual(user);
     expect(classToClassUser).toEqual({
@@ -572,7 +576,7 @@ describe('specifying target maps', () => {
     const fromExistUser = new User();
     fromExistUser.id = 1;
 
-    const plainUser: any = classToPlain(user, { strategy: 'exposeAll' });
+    const plainUser: any = instanceToPlain(user, { strategy: 'exposeAll' });
     expect(plainUser).not.toBeInstanceOf(User);
     expect(plainUser).toEqual({
       firstName: '321',
@@ -600,7 +604,7 @@ describe('specifying target maps', () => {
     });
     expect(plainUser2).toEqual(existUser);
 
-    const transformedUser = plainToClass(User, fromPlainUser, {
+    const transformedUser = plainToInstance(User, fromPlainUser, {
       strategy: 'exposeAll',
     });
     expect(transformedUser).toBeInstanceOf(User);
@@ -629,7 +633,9 @@ describe('specifying target maps', () => {
       lastVisitDate: date.toString(),
     });
 
-    const classToClassUser = classToClass(user, { strategy: 'exposeAll' });
+    const classToClassUser = instanceToInstance(user, {
+      strategy: 'exposeAll',
+    });
     expect(classToClassUser).toBeInstanceOf(User);
     expect(classToClassUser).not.toEqual(user);
     expect(classToClassUser).toEqual({
@@ -695,7 +701,7 @@ describe('specifying target maps', () => {
     user.password = 'imnosuperman';
     user.photo = photo;
 
-    const plainUser: any = classToPlain(user, { strategy: 'exposeAll' });
+    const plainUser: any = instanceToPlain(user, { strategy: 'exposeAll' });
     expect(plainUser).not.toBeInstanceOf(User);
     expect(plainUser.photo).not.toBeInstanceOf(Photo);
     expect(plainUser).toEqual({
@@ -784,7 +790,7 @@ describe('specifying target maps', () => {
     user.password = 'imnosuperman';
     user.photo = photo;
 
-    const plainUser: any = classToPlain(user);
+    const plainUser: any = instanceToPlain(user);
     expect(plainUser).not.toBeInstanceOf(User);
     expect(plainUser).toEqual({
       firstName: 'Umed',
@@ -852,7 +858,7 @@ describe('specifying target maps', () => {
     fromExistPhoto.metadata = 'taken by Camera';
     fromExistUser.photo = fromExistPhoto;
 
-    const transformedUser = plainToClass(User, fromPlainUser);
+    const transformedUser = plainToInstance(User, fromPlainUser);
     expect(transformedUser).toBeInstanceOf(User);
     expect(transformedUser.photo).toBeInstanceOf(Photo);
     expect(transformedUser).toEqual({
@@ -883,7 +889,7 @@ describe('specifying target maps', () => {
       },
     });
 
-    const classToClassUser = classToClass(user);
+    const classToClassUser = instanceToInstance(user);
     expect(classToClassUser).toBeInstanceOf(User);
     expect(classToClassUser.photo).toBeInstanceOf(Photo);
     expect(classToClassUser).not.toEqual(user);
@@ -1003,7 +1009,7 @@ describe('specifying target maps', () => {
     fromExistUser.photo = new Photo();
     fromExistUser.photo.metadata = 'taken by Camera';
 
-    const plainUser1: any = classToPlain(user);
+    const plainUser1: any = instanceToPlain(user);
     expect(plainUser1).not.toBeInstanceOf(User);
     expect(plainUser1).toEqual({
       firstName: 'Umed',
@@ -1015,7 +1021,7 @@ describe('specifying target maps', () => {
     expect(plainUser1.password).toBeUndefined();
     expect(plainUser1.isActive).toBeUndefined();
 
-    const plainUser2: any = classToPlain(user, { groups: ['user'] });
+    const plainUser2: any = instanceToPlain(user, { groups: ['user'] });
     expect(plainUser2).not.toBeInstanceOf(User);
     expect(plainUser2).toEqual({
       firstName: 'Umed',
@@ -1028,7 +1034,7 @@ describe('specifying target maps', () => {
     });
     expect(plainUser2.isActive).toBeUndefined();
 
-    const transformedUser2 = plainToClass(User, fromPlainUser, {
+    const transformedUser2 = plainToInstance(User, fromPlainUser, {
       groups: ['user'],
     });
     expect(transformedUser2).toBeInstanceOf(User);
@@ -1062,7 +1068,7 @@ describe('specifying target maps', () => {
       },
     });
 
-    const classToClassUser = classToClass(user, { groups: ['user'] });
+    const classToClassUser = instanceToInstance(user, { groups: ['user'] });
     expect(classToClassUser).toBeInstanceOf(User);
     expect(classToClassUser.photo).toBeInstanceOf(Photo);
     expect(classToClassUser).not.toEqual(user);
@@ -1099,7 +1105,7 @@ describe('specifying target maps', () => {
       },
     });
 
-    const plainUser3: any = classToPlain(user, { groups: ['guest'] });
+    const plainUser3: any = instanceToPlain(user, { groups: ['guest'] });
     expect(plainUser3).not.toBeInstanceOf(User);
     expect(plainUser3).toEqual({
       firstName: 'Umed',
@@ -1112,7 +1118,7 @@ describe('specifying target maps', () => {
     expect(plainUser3.password).toBeUndefined();
     expect(plainUser3.isActive).toBeUndefined();
 
-    const transformedUser3 = plainToClass(User, fromPlainUser, {
+    const transformedUser3 = plainToInstance(User, fromPlainUser, {
       groups: ['guest'],
     });
     expect(transformedUser3).toBeInstanceOf(User);
@@ -1126,7 +1132,7 @@ describe('specifying target maps', () => {
       },
     });
 
-    const plainUser4: any = classToPlain(user, { groups: ['admin'] });
+    const plainUser4: any = instanceToPlain(user, { groups: ['admin'] });
     expect(plainUser4).not.toBeInstanceOf(User);
     expect(plainUser4).toEqual({
       firstName: 'Umed',
@@ -1145,7 +1151,7 @@ describe('specifying target maps', () => {
     expect(plainUser4.lastName).toBeUndefined();
     expect(plainUser4.password).toBeUndefined();
 
-    const transformedUser4 = plainToClass(User, fromPlainUser, {
+    const transformedUser4 = plainToInstance(User, fromPlainUser, {
       groups: ['admin'],
     });
     expect(transformedUser4).toBeInstanceOf(User);
@@ -1166,7 +1172,9 @@ describe('specifying target maps', () => {
       ],
     });
 
-    const plainUser5: any = classToPlain(user, { groups: ['admin', 'user'] });
+    const plainUser5: any = instanceToPlain(user, {
+      groups: ['admin', 'user'],
+    });
     expect(plainUser5).not.toBeInstanceOf(User);
     expect(plainUser5).toEqual({
       firstName: 'Umed',
@@ -1187,7 +1195,7 @@ describe('specifying target maps', () => {
       ],
     });
 
-    const transformedUser5 = plainToClass(User, fromPlainUser, {
+    const transformedUser5 = plainToInstance(User, fromPlainUser, {
       groups: ['admin', 'user'],
     });
     expect(transformedUser5).toBeInstanceOf(User);
@@ -1282,7 +1290,7 @@ describe('specifying target maps', () => {
       ],
     };
 
-    const plainUser1: any = classToPlain(user);
+    const plainUser1: any = instanceToPlain(user);
     expect(plainUser1).not.toBeInstanceOf(User);
     expect(plainUser1).toEqual({
       firstName: 'Umed',
@@ -1301,7 +1309,7 @@ describe('specifying target maps', () => {
       ],
     });
 
-    const transformedUser1 = plainToClass(User, fromPlainUser);
+    const transformedUser1 = plainToInstance(User, fromPlainUser);
     expect(transformedUser1).toBeInstanceOf(User);
     expect(transformedUser1.photo).toBeInstanceOf(Photo);
     expect(transformedUser1.photos[0]).toBeInstanceOf(Photo);
@@ -1322,7 +1330,7 @@ describe('specifying target maps', () => {
       ],
     });
 
-    const plainUser2: any = classToPlain(user, { version: 0.3 });
+    const plainUser2: any = instanceToPlain(user, { version: 0.3 });
     expect(plainUser2).not.toBeInstanceOf(User);
     expect(plainUser2).toEqual({
       photo: {
@@ -1330,7 +1338,7 @@ describe('specifying target maps', () => {
       },
     });
 
-    const transformedUser2 = plainToClass(User, fromPlainUser, {
+    const transformedUser2 = plainToInstance(User, fromPlainUser, {
       version: 0.3,
     });
     expect(transformedUser2).toBeInstanceOf(User);
@@ -1341,7 +1349,7 @@ describe('specifying target maps', () => {
       },
     });
 
-    const plainUser3: any = classToPlain(user, { version: 0.5 });
+    const plainUser3: any = instanceToPlain(user, { version: 0.5 });
     expect(plainUser3).not.toBeInstanceOf(User);
     expect(plainUser3).toEqual({
       lastName: 'Khudoiberdiev',
@@ -1350,7 +1358,7 @@ describe('specifying target maps', () => {
       },
     });
 
-    const transformedUser3 = plainToClass(User, fromPlainUser, {
+    const transformedUser3 = plainToInstance(User, fromPlainUser, {
       version: 0.5,
     });
     expect(transformedUser3).toBeInstanceOf(User);
@@ -1362,7 +1370,7 @@ describe('specifying target maps', () => {
       },
     });
 
-    const plainUser4: any = classToPlain(user, { version: 1 });
+    const plainUser4: any = instanceToPlain(user, { version: 1 });
     expect(plainUser4).not.toBeInstanceOf(User);
     expect(plainUser4).toEqual({
       firstName: 'Umed',
@@ -1372,7 +1380,9 @@ describe('specifying target maps', () => {
       },
     });
 
-    const transformedUser4 = plainToClass(User, fromPlainUser, { version: 1 });
+    const transformedUser4 = plainToInstance(User, fromPlainUser, {
+      version: 1,
+    });
     expect(transformedUser4).toBeInstanceOf(User);
     expect(transformedUser4.photo).toBeInstanceOf(Photo);
     expect(transformedUser4).toEqual({
@@ -1383,7 +1393,7 @@ describe('specifying target maps', () => {
       },
     });
 
-    const plainUser5: any = classToPlain(user, { version: 1.5 });
+    const plainUser5: any = instanceToPlain(user, { version: 1.5 });
     expect(plainUser5).not.toBeInstanceOf(User);
     expect(plainUser5).toEqual({
       firstName: 'Umed',
@@ -1394,7 +1404,7 @@ describe('specifying target maps', () => {
       },
     });
 
-    const transformedUser5 = plainToClass(User, fromPlainUser, {
+    const transformedUser5 = plainToInstance(User, fromPlainUser, {
       version: 1.5,
     });
     expect(transformedUser5).toBeInstanceOf(User);
@@ -1408,7 +1418,7 @@ describe('specifying target maps', () => {
       },
     });
 
-    const plainUser6: any = classToPlain(user, { version: 2 });
+    const plainUser6: any = instanceToPlain(user, { version: 2 });
     expect(plainUser6).not.toBeInstanceOf(User);
     expect(plainUser6).toEqual({
       lastName: 'Khudoiberdiev',
@@ -1418,7 +1428,9 @@ describe('specifying target maps', () => {
       },
     });
 
-    const transformedUser6 = plainToClass(User, fromPlainUser, { version: 2 });
+    const transformedUser6 = plainToInstance(User, fromPlainUser, {
+      version: 2,
+    });
     expect(transformedUser6).toBeInstanceOf(User);
     expect(transformedUser6.photo).toBeInstanceOf(Photo);
     expect(transformedUser6).toEqual({
@@ -1429,7 +1441,7 @@ describe('specifying target maps', () => {
       },
     });
 
-    const plainUser7: any = classToPlain(user, { version: 3 });
+    const plainUser7: any = instanceToPlain(user, { version: 3 });
     expect(plainUser7).not.toBeInstanceOf(User);
     expect(plainUser7).toEqual({
       lastName: 'Khudoiberdiev',
@@ -1445,7 +1457,9 @@ describe('specifying target maps', () => {
       ],
     });
 
-    const transformedUser7 = plainToClass(User, fromPlainUser, { version: 3 });
+    const transformedUser7 = plainToInstance(User, fromPlainUser, {
+      version: 3,
+    });
     expect(transformedUser7).toBeInstanceOf(User);
     expect(transformedUser7.photo).toBeInstanceOf(Photo);
     expect(transformedUser7.photos[0]).toBeInstanceOf(Photo);
@@ -1496,7 +1510,7 @@ describe('specifying target maps', () => {
       password: 'imnosuperman',
     };
 
-    const plainUser: any = classToPlain(user);
+    const plainUser: any = instanceToPlain(user);
     expect(plainUser).not.toBeInstanceOf(User);
     expect(plainUser).toEqual({
       firstName: 'Umed',
@@ -1505,7 +1519,7 @@ describe('specifying target maps', () => {
       getName: 'Umed Khudoiberdiev',
     });
 
-    const transformedUser = plainToClass(User, fromPlainUser);
+    const transformedUser = plainToInstance(User, fromPlainUser);
     expect(transformedUser).toBeInstanceOf(User);
     const likeUser = new User();
     likeUser.firstName = 'Umed';
@@ -1548,7 +1562,7 @@ describe('specifying target maps', () => {
       password: 'imnosuperman',
     };
 
-    const plainUser: any = classToPlain(user);
+    const plainUser: any = instanceToPlain(user);
     expect(plainUser).not.toBeInstanceOf(User);
     expect(plainUser).toEqual({
       myName: 'Umed',
@@ -1557,7 +1571,7 @@ describe('specifying target maps', () => {
       fullName: 'Umed Khudoiberdiev',
     });
 
-    const transformedUser = plainToClass(User, fromPlainUser);
+    const transformedUser = plainToInstance(User, fromPlainUser);
     expect(transformedUser).toBeInstanceOf(User);
     const likeUser = new User();
     likeUser.firstName = 'Umed';
@@ -1613,7 +1627,9 @@ describe('specifying target maps', () => {
       },
     };
 
-    const plainUser: any = classToPlain(user, { excludePrefixes: ['_', '$'] });
+    const plainUser: any = instanceToPlain(user, {
+      excludePrefixes: ['_', '$'],
+    });
     expect(plainUser).not.toBeInstanceOf(User);
     expect(plainUser).toEqual({
       name: 'Umed Khudoiberdiev',
@@ -1623,7 +1639,7 @@ describe('specifying target maps', () => {
       },
     });
 
-    const transformedUser = plainToClass(User, fromPlainUser, {
+    const transformedUser = plainToInstance(User, fromPlainUser, {
       excludePrefixes: ['_', '$'],
     });
     expect(transformedUser).toBeInstanceOf(User);
@@ -1663,7 +1679,7 @@ describe('specifying target maps', () => {
 
     const users = [user1, user2];
 
-    const plainUsers: any = classToPlain(users);
+    const plainUsers: any = instanceToPlain(users);
     expect(plainUsers).toEqual([
       {
         firstName: 'Umed',
@@ -1712,7 +1728,7 @@ describe('specifying target maps', () => {
       },
     ]);
 
-    const transformedUser = plainToClass(User, fromPlainUsers);
+    const transformedUser = plainToInstance(User, fromPlainUsers);
 
     expect(transformedUser[0]).toBeInstanceOf(User);
     expect(transformedUser[1]).toBeInstanceOf(User);
@@ -1725,7 +1741,7 @@ describe('specifying target maps', () => {
     likeUser2.lastName = 'Zotov';
     expect(transformedUser).toEqual([likeUser1, likeUser2]);
 
-    const classToClassUsers = classToClass(users);
+    const classToClassUsers = instanceToInstance(users);
     expect(classToClassUsers[0]).toBeInstanceOf(User);
     expect(classToClassUsers[1]).toBeInstanceOf(User);
     expect(classToClassUsers[0]).not.toEqual(user1);

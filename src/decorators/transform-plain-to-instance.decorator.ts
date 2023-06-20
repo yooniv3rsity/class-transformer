@@ -1,12 +1,13 @@
 import { ClassTransformer } from '../ClassTransformer';
-import { ClassTransformOptions } from '../interfaces';
+import { ClassConstructor, ClassTransformOptions } from '../interfaces';
 
 /**
  * Return the class instance only with the exposed properties.
  *
  * Can be applied to functions and getters/setters only.
  */
-export function TransformClassToClass(
+export function TransformPlainToInstance(
+  classType: ClassConstructor<any>,
   params?: ClassTransformOptions
 ): MethodDecorator {
   return function (
@@ -25,9 +26,9 @@ export function TransformClassToClass(
         typeof result.then === 'function';
       return isPromise
         ? result.then((data: any) =>
-            classTransformer.classToClass(data, params)
+            classTransformer.plainToInstance(classType, data, params)
           )
-        : classTransformer.classToClass(result, params);
+        : classTransformer.plainToInstance(classType, result, params);
     };
   };
 }

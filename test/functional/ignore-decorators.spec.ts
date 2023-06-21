@@ -1,38 +1,35 @@
-import "reflect-metadata";
-import {classToPlain} from "../../src/index";
-import {defaultMetadataStorage} from "../../src/storage";
-import {Exclude, Expose} from "../../src/decorators";
+import 'reflect-metadata';
+import { instanceToPlain } from '../../src/index';
+import { defaultMetadataStorage } from '../../src/storage';
+import { Exclude, Expose } from '../../src/decorators';
 
-describe("ignoring specific decorators", () => {
+describe('ignoring specific decorators', () => {
+  it('when ignoreDecorators is set to true it should ignore all decorators', () => {
+    defaultMetadataStorage.clear();
 
-    it("when ignoreDecorators is set to true it should ignore all decorators", () => {
-        defaultMetadataStorage.clear();
+    class User {
+      id: number;
 
-        class User {
+      @Expose({ name: 'lala' })
+      firstName: string;
 
-            id: number;
+      @Expose({ groups: ['user'] })
+      lastName: string;
 
-            @Expose({ name: "lala" })
-            firstName: string;
+      @Exclude()
+      password: string;
+    }
 
-            @Expose({ groups: ["user"] })
-            lastName: string;
+    const user = new User();
+    user.firstName = 'Umed';
+    user.lastName = 'Khudoiberdiev';
+    user.password = 'imnosuperman';
 
-            @Exclude()
-            password: string;
-        }
-
-        const user = new User();
-        user.firstName = "Umed";
-        user.lastName = "Khudoiberdiev";
-        user.password = "imnosuperman";
-
-        const plainedUser = classToPlain(user, { ignoreDecorators: true });
-        plainedUser.should.be.eql({
-            firstName: "Umed",
-            lastName: "Khudoiberdiev",
-            password: "imnosuperman"
-        });
+    const plainedUser = instanceToPlain(user, { ignoreDecorators: true });
+    expect(plainedUser).toEqual({
+      firstName: 'Umed',
+      lastName: 'Khudoiberdiev',
+      password: 'imnosuperman',
     });
-
+  });
 });

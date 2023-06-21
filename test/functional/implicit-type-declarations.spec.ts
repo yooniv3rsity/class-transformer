@@ -1,138 +1,154 @@
-import "reflect-metadata";
-import {
-    plainToClass,
-} from "../../src/index";
-import {defaultMetadataStorage} from "../../src/storage";
-import {Expose, Type} from "../../src/decorators";
-import {expect} from "chai";
+import 'reflect-metadata';
+import { plainToInstance } from '../../src/index';
+import { defaultMetadataStorage } from '../../src/storage';
+import { Expose, Type } from '../../src/decorators';
 
-describe("implicit type conversion", () => {
-    it("should run only when enabled", () => {
-        defaultMetadataStorage.clear();
-
-        class SimpleExample {
-
-        @Expose()
-        readonly implicitTypeNumber: number;
-
-        @Expose()
-        readonly implicitTypeString: string;
-        }
-
-        const result1: SimpleExample = plainToClass(SimpleExample, {
-            implicitTypeNumber: "100",
-            implicitTypeString: 133123,
-        }, { enableImplicitConversion: true });
-
-        const result2: SimpleExample = plainToClass(SimpleExample, {
-            implicitTypeNumber: "100",
-            implicitTypeString: 133123,
-        }, { enableImplicitConversion: false });
-
-        expect(result1).to.deep.equal({ implicitTypeNumber: 100, implicitTypeString: "133123" });
-        expect(result2).to.deep.equal({ implicitTypeNumber: "100", implicitTypeString: 133123 });
-    });
-});
-
-describe("implicit and explicity type declarations", () => {
-
+describe('implicit type conversion', () => {
+  it('should run only when enabled', () => {
     defaultMetadataStorage.clear();
 
-    class Example {
+    class SimpleExample {
+      @Expose()
+      readonly implicitTypeNumber: number;
 
-        @Expose()
-        readonly implicitTypeViaOtherDecorator: Date;
-
-        @Type()
-        readonly implicitTypeViaEmptyTypeDecorator: number;
-
-        @Type(() => String)
-        readonly explicitType: string;
+      @Expose()
+      readonly implicitTypeString: string;
     }
 
-    const result: Example = plainToClass(Example, {
-        implicitTypeViaOtherDecorator: "2018-12-24T12:00:00Z",
-        implicitTypeViaEmptyTypeDecorator: "100",
-        explicitType: 100,
-    }, { enableImplicitConversion: true });
+    const result1: SimpleExample = plainToInstance(
+      SimpleExample,
+      {
+        implicitTypeNumber: '100',
+        implicitTypeString: 133123,
+      },
+      { enableImplicitConversion: true }
+    );
 
-    it("should use implicitly defined design:type to convert value when no @Type decorator is used", () => {
-        expect(result.implicitTypeViaOtherDecorator).to.be.instanceOf(Date);
-        expect(result.implicitTypeViaOtherDecorator.getTime()).to.be.equal(new Date("2018-12-24T12:00:00Z").getTime());
+    const result2: SimpleExample = plainToInstance(
+      SimpleExample,
+      {
+        implicitTypeNumber: '100',
+        implicitTypeString: 133123,
+      },
+      { enableImplicitConversion: false }
+    );
+
+    expect(result1).toEqual({
+      implicitTypeNumber: 100,
+      implicitTypeString: '133123',
     });
-
-    it("should use implicitly defined design:type to convert value when empty @Type() decorator is used", () => {
-        expect(result.implicitTypeViaEmptyTypeDecorator).that.is.a("number");
-        expect(result.implicitTypeViaEmptyTypeDecorator).to.be.equal(100);
+    expect(result2).toEqual({
+      implicitTypeNumber: '100',
+      implicitTypeString: 133123,
     });
-
-    it("should use explicitly defined type when @Type(() => Construtable) decorator is used", () => {
-        expect(result.explicitType).that.is.a("string");
-        expect(result.explicitType).to.be.equal("100");
-    });
-
+  });
 });
 
-describe("plainToClass transforms built-in primitive types properly", () => {
+describe('implicit and explicity type declarations', () => {
+  defaultMetadataStorage.clear();
 
-    defaultMetadataStorage.clear();
+  class Example {
+    @Expose()
+    readonly implicitTypeViaOtherDecorator: Date;
 
-    class Example {
+    @Type()
+    readonly implicitTypeViaEmptyTypeDecorator: number;
 
-        @Type()
-        date: Date;
+    @Type(() => String)
+    readonly explicitType: string;
+  }
 
-        @Type()
-        string: string;
+  const result: Example = plainToInstance(
+    Example,
+    {
+      implicitTypeViaOtherDecorator: '2018-12-24T12:00:00Z',
+      implicitTypeViaEmptyTypeDecorator: '100',
+      explicitType: 100,
+    },
+    { enableImplicitConversion: true }
+  );
 
-        @Type()
-        string2: string;
+  it('should use implicitly defined design:type to convert value when no @Type decorator is used', () => {
+    expect(result.implicitTypeViaOtherDecorator).toBeInstanceOf(Date);
+    expect(result.implicitTypeViaOtherDecorator.getTime()).toEqual(
+      new Date('2018-12-24T12:00:00Z').getTime()
+    );
+  });
 
-        @Type()
-        number: number;
+  it('should use implicitly defined design:type to convert value when empty @Type() decorator is used', () => {
+    expect(typeof result.implicitTypeViaEmptyTypeDecorator).toBe('number');
+    expect(result.implicitTypeViaEmptyTypeDecorator).toEqual(100);
+  });
 
-        @Type()
-        number2: number;
+  it('should use explicitly defined type when @Type(() => Construtable) decorator is used', () => {
+    expect(typeof result.explicitType).toBe('string');
+    expect(result.explicitType).toEqual('100');
+  });
+});
 
-        @Type()
-        boolean: boolean;
+describe('plainToInstance transforms built-in primitive types properly', () => {
+  defaultMetadataStorage.clear();
 
-        @Type()
-        boolean2: boolean;
-    }
+  class Example {
+    @Type()
+    date: Date;
 
-    const result: Example = plainToClass(Example, {
-        date: "2018-12-24T12:00:00Z",
-        string: "100",
-        string2: 100,
-        number: "100",
-        number2: 100,
-        boolean: 1,
-        boolean2: 0,
-    }, { enableImplicitConversion: true });
+    @Type()
+    string: string;
 
-    it("should recognize and convert to Date", () => {
-        expect(result.date).to.be.instanceOf(Date);
-        expect(result.date.getTime()).to.be.equal(new Date("2018-12-24T12:00:00Z").getTime());
-    });
+    @Type()
+    string2: string;
 
-    it("should recognize and convert to string", () => {
-        expect(result.string).that.is.a("string");
-        expect(result.string2).that.is.a("string");
-        expect(result.string).to.be.equal("100");
-        expect(result.string2).to.be.equal("100");
-    });
+    @Type()
+    number: number;
 
-    it("should recognize and convert to number", () => {
-        expect(result.number).that.is.a("number");
-        expect(result.number2).that.is.a("number");
-        expect(result.number).to.be.equal(100);
-        expect(result.number2).to.be.equal(100);
-    });
+    @Type()
+    number2: number;
 
-    it("should recognize and convert to boolean", () => {
-        expect(result.boolean).to.be.true;
-        expect(result.boolean2).to.be.false;
-    });
+    @Type()
+    boolean: boolean;
 
+    @Type()
+    boolean2: boolean;
+  }
+
+  const result: Example = plainToInstance(
+    Example,
+    {
+      date: '2018-12-24T12:00:00Z',
+      string: '100',
+      string2: 100,
+      number: '100',
+      number2: 100,
+      boolean: 1,
+      boolean2: 0,
+    },
+    { enableImplicitConversion: true }
+  );
+
+  it('should recognize and convert to Date', () => {
+    expect(result.date).toBeInstanceOf(Date);
+    expect(result.date.getTime()).toEqual(
+      new Date('2018-12-24T12:00:00Z').getTime()
+    );
+  });
+
+  it('should recognize and convert to string', () => {
+    expect(typeof result.string).toBe('string');
+    expect(typeof result.string2).toBe('string');
+    expect(result.string).toEqual('100');
+    expect(result.string2).toEqual('100');
+  });
+
+  it('should recognize and convert to number', () => {
+    expect(typeof result.number).toBe('number');
+    expect(typeof result.number2).toBe('number');
+    expect(result.number).toEqual(100);
+    expect(result.number2).toEqual(100);
+  });
+
+  it('should recognize and convert to boolean', () => {
+    expect(result.boolean).toBeTruthy();
+    expect(result.boolean2).toBeFalsy();
+  });
 });

@@ -12,3 +12,4 @@ export * from './class-constructor.type';
 export * from './class-transformer-options.interface';
 export * from './target-map.interface';
 export * from './type-help-options.interface';
+export * from './external-dependencies.interface';

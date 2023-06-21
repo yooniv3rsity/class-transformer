@@ -1,6 +1,7 @@
 import { TransformationType } from './enums';
 import {
   ClassTransformOptions,
+  ClassTransformerExternalDependencies,
   TypeHelpOptions,
   TypeMetadata,
   TypeOptions,
@@ -29,7 +30,8 @@ export class TransformOperationExecutor {
 
   constructor(
     private transformationType: TransformationType,
-    private options: ClassTransformOptions
+    private options: ClassTransformOptions,
+    private dependencies: ClassTransformerExternalDependencies = {}
   ) {}
 
   // -------------------------------------------------------------------------
@@ -540,6 +542,7 @@ export class TransformOperationExecutor {
         obj,
         type: transformationType,
         options: this.options,
+        dependencies: this.dependencies,
       });
     });
 

@@ -1,6 +1,7 @@
 import { TransformationType } from './enums';
 import {
   ClassTransformOptions,
+  ClassTransformerExternalDependencies,
   TypeHelpOptions,
   TypeMetadata,
   TypeOptions,
@@ -29,7 +30,8 @@ export class TransformOperationExecutor {
 
   constructor(
     private transformationType: TransformationType,
-    private options: ClassTransformOptions
+    private options: ClassTransformOptions,
+    private dependencies: ClassTransformerExternalDependencies = {}
   ) {}
 
   // -------------------------------------------------------------------------
@@ -37,6 +39,31 @@ export class TransformOperationExecutor {
   // -------------------------------------------------------------------------
 
   transform(
+    source: Record<string, any> | Record<string, any>[] | any,
+    value: Record<string, any> | Record<string, any>[] | any,
+    targetType: Function | TypeMetadata,
+    arrayType: Function,
+    isMap: boolean,
+    level = 0
+  ): any {
+    if (this.options.transformationHandler) {
+      return this.options.transformationHandler(
+        { source, value, targetType, arrayType, isMap, level },
+        this
+      );
+    } else {
+      return this.doTransform(
+        source,
+        value,
+        targetType,
+        arrayType,
+        isMap,
+        level
+      );
+    }
+  }
+
+  doTransform(
     source: Record<string, any> | Record<string, any>[] | any,
     value: Record<string, any> | Record<string, any>[] | any,
     targetType: Function | TypeMetadata,
@@ -540,6 +567,8 @@ export class TransformOperationExecutor {
         obj,
         type: transformationType,
         options: this.options,
+        dependencies: this.dependencies,
+        executor: this,
       });
     });
 

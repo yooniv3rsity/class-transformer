@@ -1,3 +1,4 @@
+import { ExecuteTransformationHandler } from './execute-transformation-handler.interface';
 import { TargetMap } from './target-map.interface';
 
 /**
@@ -82,4 +83,10 @@ export interface ClassTransformOptions {
    * DEFAULT: `true`
    */
   exposeUnsetFields?: boolean;
+
+  /**
+   * TransformOperationExecutor calls its transform method recursively for nested data.
+   * This allows to specify a custom handler that will be executed and can decide how to process the specified data.
+   */
+  transformationHandler?: ExecuteTransformationHandler;
 }

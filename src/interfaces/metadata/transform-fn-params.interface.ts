@@ -1,5 +1,7 @@
+import { TransformOperationExecutor } from '../../TransformOperationExecutor';
 import { TransformationType } from '../../enums';
 import { ClassTransformOptions } from '../class-transformer-options.interface';
+import { ClassTransformerExternalDependencies } from '../external-dependencies.interface';
 
 export interface TransformFnParams {
   value: any;
@@ -7,4 +9,6 @@ export interface TransformFnParams {
   obj: any;
   type: TransformationType;
   options: ClassTransformOptions;
+  dependencies: ClassTransformerExternalDependencies;
+  executor: TransformOperationExecutor;
 }

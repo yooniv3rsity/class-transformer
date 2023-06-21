@@ -1,7 +1,12 @@
 import { ClassTransformer } from './ClassTransformer';
-import { ClassConstructor, ClassTransformOptions } from './interfaces';
+import {
+  ClassConstructor,
+  ClassTransformOptions,
+  ClassTransformerExternalDependencies,
+} from './interfaces';
 
 export { ClassTransformer } from './ClassTransformer';
+export { TransformOperationExecutor } from './TransformOperationExecutor';
 
 export { getGlobal } from './utils';
 export { defaultMetadataStorage } from './storage';
@@ -19,17 +24,20 @@ const classTransformer = new ClassTransformer();
  */
 export function classToPlain<T>(
   object: T,
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): Record<string, any>;
 export function classToPlain<T>(
   object: T[],
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): Record<string, any>[];
 export function classToPlain<T>(
   object: T | T[],
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): Record<string, any> | Record<string, any>[] {
-  return classTransformer.instanceToPlain(object, options);
+  return classTransformer.instanceToPlain(object, options, dependencies);
 }
 
 /**
@@ -37,17 +45,20 @@ export function classToPlain<T>(
  */
 export function instanceToPlain<T>(
   object: T,
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): Record<string, any>;
 export function instanceToPlain<T>(
   object: T[],
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): Record<string, any>[];
 export function instanceToPlain<T>(
   object: T | T[],
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): Record<string, any> | Record<string, any>[] {
-  return classTransformer.instanceToPlain(object, options);
+  return classTransformer.instanceToPlain(object, options, dependencies);
 }
 
 /**
@@ -60,19 +71,27 @@ export function instanceToPlain<T>(
 export function classToPlainFromExist<T>(
   object: T,
   plainObject: Record<string, any>,
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): Record<string, any>;
 export function classToPlainFromExist<T>(
   object: T,
   plainObjects: Record<string, any>[],
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): Record<string, any>[];
 export function classToPlainFromExist<T>(
   object: T,
   plainObject: Record<string, any> | Record<string, any>[],
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): Record<string, any> | Record<string, any>[] {
-  return classTransformer.classToPlainFromExist(object, plainObject, options);
+  return classTransformer.classToPlainFromExist(
+    object,
+    plainObject,
+    options,
+    dependencies
+  );
 }
 
 /**
@@ -83,19 +102,27 @@ export function classToPlainFromExist<T>(
 export function plainToClass<T, V>(
   cls: ClassConstructor<T>,
   plain: V[],
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): T[];
 export function plainToClass<T, V>(
   cls: ClassConstructor<T>,
   plain: V,
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): T;
 export function plainToClass<T, V>(
   cls: ClassConstructor<T>,
   plain: V | V[],
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): T | T[] {
-  return classTransformer.plainToInstance(cls, plain as any, options);
+  return classTransformer.plainToInstance(
+    cls,
+    plain as any,
+    options,
+    dependencies
+  );
 }
 
 /**
@@ -104,19 +131,27 @@ export function plainToClass<T, V>(
 export function plainToInstance<T, V>(
   cls: ClassConstructor<T>,
   plain: V[],
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): T[];
 export function plainToInstance<T, V>(
   cls: ClassConstructor<T>,
   plain: V,
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): T;
 export function plainToInstance<T, V>(
   cls: ClassConstructor<T>,
   plain: V | V[],
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): T | T[] {
-  return classTransformer.plainToInstance(cls, plain as any, options);
+  return classTransformer.plainToInstance(
+    cls,
+    plain as any,
+    options,
+    dependencies
+  );
 }
 
 /**
@@ -129,19 +164,27 @@ export function plainToInstance<T, V>(
 export function plainToClassFromExist<T, V>(
   clsObject: T[],
   plain: V[],
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): T[];
 export function plainToClassFromExist<T, V>(
   clsObject: T,
   plain: V,
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): T;
 export function plainToClassFromExist<T, V>(
   clsObject: T,
   plain: V | V[],
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): T | T[] {
-  return classTransformer.plainToClassFromExist(clsObject, plain, options);
+  return classTransformer.plainToClassFromExist(
+    clsObject,
+    plain,
+    options,
+    dependencies
+  );
 }
 
 /**
@@ -149,17 +192,20 @@ export function plainToClassFromExist<T, V>(
  */
 export function instanceToInstance<T>(
   object: T,
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): T;
 export function instanceToInstance<T>(
   object: T[],
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): T[];
 export function instanceToInstance<T>(
   object: T | T[],
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): T | T[] {
-  return classTransformer.instanceToInstance(object, options);
+  return classTransformer.instanceToInstance(object, options, dependencies);
 }
 
 /**
@@ -172,19 +218,27 @@ export function instanceToInstance<T>(
 export function classToClassFromExist<T>(
   object: T,
   fromObject: T,
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): T;
 export function classToClassFromExist<T>(
   object: T,
   fromObjects: T[],
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): T[];
 export function classToClassFromExist<T>(
   object: T,
   fromObject: T | T[],
-  options?: ClassTransformOptions
+  options?: ClassTransformOptions,
+  dependencies?: ClassTransformerExternalDependencies
 ): T | T[] {
-  return classTransformer.classToClassFromExist(object, fromObject, options);
+  return classTransformer.classToClassFromExist(
+    object,
+    fromObject,
+    options,
+    dependencies
+  );
 }
 
 /**

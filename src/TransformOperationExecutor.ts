@@ -543,6 +543,7 @@ export class TransformOperationExecutor {
         type: transformationType,
         options: this.options,
         dependencies: this.dependencies,
+        executor: this,
       });
     });
 

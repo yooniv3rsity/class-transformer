@@ -1,7 +1,11 @@
 import 'reflect-metadata';
-import { instanceToInstance, instanceToPlain, plainToInstance } from '../../src/index';
-import { defaultMetadataStorage } from '../../src/storage';
 import { TransformOperationExecutor } from '../../src/TransformOperationExecutor';
+import {
+  instanceToInstance,
+  instanceToPlain,
+  plainToInstance,
+} from '../../src/index';
+import { defaultMetadataStorage } from '../../src/storage';
 
 describe('circular reference problem', () => {
   it('should skip circular reference objects in instanceToPlain operation', () => {
@@ -131,7 +135,10 @@ describe('circular reference problem', () => {
     user.photos = [photo1];
 
     beforeEach(() => {
-      isCircularSpy = jest.spyOn(TransformOperationExecutor.prototype, 'isCircular' as any);
+      isCircularSpy = jest.spyOn(
+        TransformOperationExecutor.prototype,
+        'isCircular' as any
+      );
     });
 
     afterEach(() => {
@@ -144,7 +151,9 @@ describe('circular reference problem', () => {
     });
 
     it('enableCircularCheck option is true', () => {
-      plainToInstance<User, Record<string, any>>(User, user, { enableCircularCheck: true });
+      plainToInstance<User, Record<string, any>>(User, user, {
+        enableCircularCheck: true,
+      });
       expect(isCircularSpy).toHaveBeenCalled();
     });
   });

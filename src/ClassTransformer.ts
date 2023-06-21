@@ -1,8 +1,7 @@
-import { ClassTransformOptions } from './interfaces';
 import { TransformOperationExecutor } from './TransformOperationExecutor';
-import { TransformationType } from './enums';
-import { ClassConstructor } from './interfaces';
 import { defaultOptions } from './constants/default-options.constant';
+import { TransformationType } from './enums';
+import { ClassConstructor, ClassTransformOptions } from './interfaces';
 
 export class ClassTransformer {
   // -------------------------------------------------------------------------
@@ -12,17 +11,33 @@ export class ClassTransformer {
   /**
    * Converts class (constructor) object to plain (literal) object. Also works with arrays.
    */
-  instanceToPlain<T extends Record<string, any>>(object: T, options?: ClassTransformOptions): Record<string, any>;
-  instanceToPlain<T extends Record<string, any>>(object: T[], options?: ClassTransformOptions): Record<string, any>[];
+  instanceToPlain<T extends Record<string, any>>(
+    object: T,
+    options?: ClassTransformOptions
+  ): Record<string, any>;
+  instanceToPlain<T extends Record<string, any>>(
+    object: T[],
+    options?: ClassTransformOptions
+  ): Record<string, any>[];
   instanceToPlain<T extends Record<string, any>>(
     object: T | T[],
     options?: ClassTransformOptions
   ): Record<string, any> | Record<string, any>[] {
-    const executor = new TransformOperationExecutor(TransformationType.CLASS_TO_PLAIN, {
-      ...defaultOptions,
-      ...options,
-    });
-    return executor.transform(undefined, object, undefined, undefined, undefined, undefined);
+    const executor = new TransformOperationExecutor(
+      TransformationType.CLASS_TO_PLAIN,
+      {
+        ...defaultOptions,
+        ...options,
+      }
+    );
+    return executor.transform(
+      undefined,
+      object,
+      undefined,
+      undefined,
+      undefined,
+      undefined
+    );
   }
 
   /**
@@ -45,11 +60,21 @@ export class ClassTransformer {
     plainObject: P | P[],
     options?: ClassTransformOptions
   ): T | T[] {
-    const executor = new TransformOperationExecutor(TransformationType.CLASS_TO_PLAIN, {
-      ...defaultOptions,
-      ...options,
-    });
-    return executor.transform(plainObject, object, undefined, undefined, undefined, undefined);
+    const executor = new TransformOperationExecutor(
+      TransformationType.CLASS_TO_PLAIN,
+      {
+        ...defaultOptions,
+        ...options,
+      }
+    );
+    return executor.transform(
+      plainObject,
+      object,
+      undefined,
+      undefined,
+      undefined,
+      undefined
+    );
   }
 
   /**
@@ -70,11 +95,21 @@ export class ClassTransformer {
     plain: V | V[],
     options?: ClassTransformOptions
   ): T | T[] {
-    const executor = new TransformOperationExecutor(TransformationType.PLAIN_TO_CLASS, {
-      ...defaultOptions,
-      ...options,
-    });
-    return executor.transform(undefined, plain, cls, undefined, undefined, undefined);
+    const executor = new TransformOperationExecutor(
+      TransformationType.PLAIN_TO_CLASS,
+      {
+        ...defaultOptions,
+        ...options,
+      }
+    );
+    return executor.transform(
+      undefined,
+      plain,
+      cls,
+      undefined,
+      undefined,
+      undefined
+    );
   }
 
   /**
@@ -87,17 +122,31 @@ export class ClassTransformer {
     plain: V,
     options?: ClassTransformOptions
   ): T;
-  plainToClassFromExist<T extends Record<string, any>, V>(clsObject: T, plain: V, options?: ClassTransformOptions): T[];
+  plainToClassFromExist<T extends Record<string, any>, V>(
+    clsObject: T,
+    plain: V,
+    options?: ClassTransformOptions
+  ): T[];
   plainToClassFromExist<T extends Record<string, any>, V>(
     clsObject: T,
     plain: V | V[],
     options?: ClassTransformOptions
   ): T | T[] {
-    const executor = new TransformOperationExecutor(TransformationType.PLAIN_TO_CLASS, {
-      ...defaultOptions,
-      ...options,
-    });
-    return executor.transform(clsObject, plain, undefined, undefined, undefined, undefined);
+    const executor = new TransformOperationExecutor(
+      TransformationType.PLAIN_TO_CLASS,
+      {
+        ...defaultOptions,
+        ...options,
+      }
+    );
+    return executor.transform(
+      clsObject,
+      plain,
+      undefined,
+      undefined,
+      undefined,
+      undefined
+    );
   }
 
   /**
@@ -105,12 +154,25 @@ export class ClassTransformer {
    */
   instanceToInstance<T>(object: T, options?: ClassTransformOptions): T;
   instanceToInstance<T>(object: T[], options?: ClassTransformOptions): T[];
-  instanceToInstance<T>(object: T | T[], options?: ClassTransformOptions): T | T[] {
-    const executor = new TransformOperationExecutor(TransformationType.CLASS_TO_CLASS, {
-      ...defaultOptions,
-      ...options,
-    });
-    return executor.transform(undefined, object, undefined, undefined, undefined, undefined);
+  instanceToInstance<T>(
+    object: T | T[],
+    options?: ClassTransformOptions
+  ): T | T[] {
+    const executor = new TransformOperationExecutor(
+      TransformationType.CLASS_TO_CLASS,
+      {
+        ...defaultOptions,
+        ...options,
+      }
+    );
+    return executor.transform(
+      undefined,
+      object,
+      undefined,
+      undefined,
+      undefined,
+      undefined
+    );
   }
 
   /**
@@ -118,14 +180,36 @@ export class ClassTransformer {
    * Uses given plain object as source object (it means fills given plain object with data from class object).
    * Also works with arrays.
    */
-  classToClassFromExist<T>(object: T, fromObject: T, options?: ClassTransformOptions): T;
-  classToClassFromExist<T>(object: T, fromObjects: T[], options?: ClassTransformOptions): T[];
-  classToClassFromExist<T>(object: T, fromObject: T | T[], options?: ClassTransformOptions): T | T[] {
-    const executor = new TransformOperationExecutor(TransformationType.CLASS_TO_CLASS, {
-      ...defaultOptions,
-      ...options,
-    });
-    return executor.transform(fromObject, object, undefined, undefined, undefined, undefined);
+  classToClassFromExist<T>(
+    object: T,
+    fromObject: T,
+    options?: ClassTransformOptions
+  ): T;
+  classToClassFromExist<T>(
+    object: T,
+    fromObjects: T[],
+    options?: ClassTransformOptions
+  ): T[];
+  classToClassFromExist<T>(
+    object: T,
+    fromObject: T | T[],
+    options?: ClassTransformOptions
+  ): T | T[] {
+    const executor = new TransformOperationExecutor(
+      TransformationType.CLASS_TO_CLASS,
+      {
+        ...defaultOptions,
+        ...options,
+      }
+    );
+    return executor.transform(
+      fromObject,
+      object,
+      undefined,
+      undefined,
+      undefined,
+      undefined
+    );
   }
 
   /**
@@ -140,7 +224,11 @@ export class ClassTransformer {
   /**
    * Deserializes given JSON string to a object of the given class.
    */
-  deserialize<T>(cls: ClassConstructor<T>, json: string, options?: ClassTransformOptions): T {
+  deserialize<T>(
+    cls: ClassConstructor<T>,
+    json: string,
+    options?: ClassTransformOptions
+  ): T {
     const jsonObject: T = JSON.parse(json);
     return this.plainToInstance(cls, jsonObject, options);
   }
@@ -148,7 +236,11 @@ export class ClassTransformer {
   /**
    * Deserializes given JSON string to an array of objects of the given class.
    */
-  deserializeArray<T>(cls: ClassConstructor<T>, json: string, options?: ClassTransformOptions): T[] {
+  deserializeArray<T>(
+    cls: ClassConstructor<T>,
+    json: string,
+    options?: ClassTransformOptions
+  ): T[] {
     const jsonObject: any[] = JSON.parse(json);
     return this.plainToInstance(cls, jsonObject, options);
   }

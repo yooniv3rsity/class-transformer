@@ -35,7 +35,9 @@ describe('inheritence', () => {
     const classedStudent = plainToInstance(Student, plainStudent);
     expect(classedStudent.name).toEqual('JOHNY CAGE');
     expect(classedStudent.university).toEqual('MIT');
-    expect(classedStudent.birthDate.getTime()).toEqual(new Date(1967, 2, 1).getTime());
+    expect(classedStudent.birthDate.getTime()).toEqual(
+      new Date(1967, 2, 1).getTime()
+    );
     expect(classedStudent.id).toEqual(plainStudent.id);
     expect(classedStudent.email).toEqual(plainStudent.email);
   });

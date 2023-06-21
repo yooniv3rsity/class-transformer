@@ -1,7 +1,7 @@
 import 'reflect-metadata';
-import { instanceToPlain, plainToInstance, Expose } from '../../src/index';
-import { defaultMetadataStorage } from '../../src/storage';
 import { Type } from '../../src/decorators';
+import { Expose, instanceToPlain, plainToInstance } from '../../src/index';
+import { defaultMetadataStorage } from '../../src/storage';
 
 describe('es6 data types', () => {
   it('using Map', () => {
@@ -340,10 +340,14 @@ describe('es6 data types', () => {
       });
     }
 
-    const classedUser = plainToInstance(User, plainUser, { excludeExtraneousValues: false });
+    const classedUser = plainToInstance(User, plainUser, {
+      excludeExtraneousValues: false,
+    });
     checkPlainToClassUser(classedUser);
 
-    const classedUser2 = plainToInstance(User, plainUser, { excludeExtraneousValues: true });
+    const classedUser2 = plainToInstance(User, plainUser, {
+      excludeExtraneousValues: true,
+    });
     checkPlainToClassUser(classedUser2);
   });
 });

@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import 'reflect-metadata';
-import {
-  instanceToInstance,
-  instanceToPlain,
-  ClassTransformOptions,
-  plainToInstance,
-  TransformFnParams,
-} from '../../src/index';
-import { defaultMetadataStorage } from '../../src/storage';
 import { Expose, Transform, Type } from '../../src/decorators';
 import { TransformationType } from '../../src/enums';
+import {
+  ClassTransformOptions,
+  TransformFnParams,
+  instanceToInstance,
+  instanceToPlain,
+  plainToInstance,
+} from '../../src/index';
+import { defaultMetadataStorage } from '../../src/storage';
 
 describe('custom transformation decorator', () => {
   it('@Expose decorator with "name" option should work with @Transform decorator', () => {
@@ -75,7 +75,10 @@ describe('custom transformation decorator', () => {
       name: string;
 
       @Type(() => Date)
-      @Transform(({ value }) => 'custom-transformed-version-check', { since: 1, until: 2 })
+      @Transform(({ value }) => 'custom-transformed-version-check', {
+        since: 1,
+        until: 2,
+      })
       date: Date;
 
       @Type(() => Date)
@@ -118,7 +121,9 @@ describe('custom transformation decorator', () => {
     expect(classedUser5).toBeInstanceOf(User);
     expect(classedUser5.id).toEqual(1);
     expect(classedUser5.name).toEqual('Johny Cage');
-    expect(classedUser5.lastVisitDate).toEqual(new Date(plainUser.lastVisitDate).toString());
+    expect(classedUser5.lastVisitDate).toEqual(
+      new Date(plainUser.lastVisitDate).toString()
+    );
   });
 
   it('@Transform decorator callback should be given correct arguments', () => {
@@ -129,7 +134,13 @@ describe('custom transformation decorator', () => {
     let typeArg: TransformationType;
     let optionsArg: ClassTransformOptions;
 
-    function transformCallback({ value, key, obj, type, options }: TransformFnParams): any {
+    function transformCallback({
+      value,
+      key,
+      obj,
+      type,
+      options,
+    }: TransformFnParams): any {
       keyArg = key;
       objArg = obj;
       typeArg = type;
@@ -211,7 +222,10 @@ describe('custom transformation decorator', () => {
         public address: Address;
 
         @Type(() => Hobby)
-        @Transform(({ value }) => value.filter((hobby: any) => hobby.type === 'sport'), { toClassOnly: true })
+        @Transform(
+          ({ value }) => value.filter((hobby: any) => hobby.type === 'sport'),
+          { toClassOnly: true }
+        )
         public hobbies: Hobby[];
 
         public age: number;
@@ -219,7 +233,9 @@ describe('custom transformation decorator', () => {
       model = plainToInstance(Person, json);
       expect(model instanceof Person);
       expect(model.address instanceof Address);
-      model.hobbies.forEach((hobby: Hobby) => expect(hobby instanceof Hobby && hobby.type === 'sport'));
+      model.hobbies.forEach((hobby: Hobby) =>
+        expect(hobby instanceof Hobby && hobby.type === 'sport')
+      );
     }).not.toThrow();
   });
 
@@ -228,7 +244,11 @@ describe('custom transformation decorator', () => {
     expect(() => {
       const json = {
         name: 'John Doe',
-        hobby: { __type: 'program', name: 'typescript coding', specialAbility: 'testing' },
+        hobby: {
+          __type: 'program',
+          name: 'typescript coding',
+          specialAbility: 'testing',
+        },
       };
 
       abstract class Hobby {
@@ -264,7 +284,10 @@ describe('custom transformation decorator', () => {
         public hobby: any;
       }
 
-      const expectedHobby = { name: 'typescript coding', specialAbility: 'TESTING' };
+      const expectedHobby = {
+        name: 'typescript coding',
+        specialAbility: 'TESTING',
+      };
 
       const model: Person = plainToInstance(Person, json);
       expect(model).toBeInstanceOf(Person);
@@ -280,7 +303,11 @@ describe('custom transformation decorator', () => {
       const json = {
         name: 'John Doe',
         hobbies: [
-          { __type: 'program', name: 'typescript coding', specialAbility: 'testing' },
+          {
+            __type: 'program',
+            name: 'typescript coding',
+            specialAbility: 'testing',
+          },
           { __type: 'relax', name: 'sun' },
         ],
       };
@@ -334,7 +361,11 @@ describe('custom transformation decorator', () => {
     expect(() => {
       const json = {
         name: 'John Doe',
-        hobby: { __type: 'program', name: 'typescript coding', specialAbility: 'testing' },
+        hobby: {
+          __type: 'program',
+          name: 'typescript coding',
+          specialAbility: 'testing',
+        },
       };
 
       abstract class Hobby {
@@ -385,7 +416,11 @@ describe('custom transformation decorator', () => {
       const json = {
         name: 'John Doe',
         hobbies: [
-          { __type: 'program', name: 'typescript coding', specialAbility: 'testing' },
+          {
+            __type: 'program',
+            name: 'typescript coding',
+            specialAbility: 'testing',
+          },
           { __type: 'relax', name: 'sun' },
         ],
       };
@@ -692,7 +727,11 @@ describe('custom transformation decorator', () => {
     expect(() => {
       const json = {
         name: 'John Doe',
-        hobby: { __type: 'program', name: 'typescript coding', specialAbility: 'testing' },
+        hobby: {
+          __type: 'program',
+          name: 'typescript coding',
+          specialAbility: 'testing',
+        },
       };
 
       abstract class Hobby {
@@ -738,7 +777,11 @@ describe('custom transformation decorator', () => {
       const json = {
         name: 'John Doe',
         hobbies: [
-          { __type: 'program', name: 'typescript coding', specialAbility: 'testing' },
+          {
+            __type: 'program',
+            name: 'typescript coding',
+            specialAbility: 'testing',
+          },
           { __type: 'relax', name: 'sun' },
         ],
       };

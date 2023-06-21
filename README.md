@@ -1,9 +1,13 @@
 # @yoolabs/class-transformer
 
-## class-transformer-global-storage
-
-This fork uses `global` scope for caching metadata information. This allows importing this package
-from multiple locations, but might cause problems if multiple versions are installed at the same time.\_
+> **IMPORTANT NOTE!**
+>
+> This repository is a fork of the original [`class-transformer`](https://github.com/typestack/class-transformer) package.
+> It adds tweaks of
+>
+> - class-transformer-global-storage (exports metadata storage, so that metadata is accessible)
+> - nestjs class-transformer (currently only updates, no funtionality changes or fixes)
+> - yoolabs class-transformer (custom functionality documented below)
 
 ## yoolabs class-transformer
 
@@ -18,46 +22,46 @@ Class-transformer allows you to transform plain object to some instance of class
 Also it allows to serialize / deserialize object based on criteria.
 This tool is super useful on both frontend and backend.
 
-Example how to use with angular 2 in [plunker](http://plnkr.co/edit/Mja1ZYAjVySWASMHVB9R).
-Source code is available [here](https://github.com/pleerock/class-transformer-demo).
-
 ## Table of contents
 
-- [What is class-transformer](#what-is-class-transformer)
-- [Installation](#installation)
-  - [Node.js](#nodejs)
-  - [Browser](#browser)
-- [Methods](#methods)
-  - [plainToClass](#plaintoclass)
-  - [plainToClassFromExist](#plaintoclassfromexist)
-  - [classToPlain](#classtoplain)
-  - [classToClass](#classtoclass)
-  - [serialize](#serialize)
-  - [deserialize and deserializeArray](#deserialize-and-deserializearray)
-- [Enforcing type-safe instance](#enforcing-type-safe-instance)
-- [Working with nested objects](#working-with-nested-objects)
-  - [Providing more than one type option](#providing-more-than-one-type-option)
-- [Exposing getters and method return values](#exposing-getters-and-method-return-values)
-- [Exposing properties with different names](#exposing-properties-with-different-names)
-- [Skipping specific properties](#skipping-specific-properties)
-- [Skipping depend of operation](#skipping-depend-of-operation)
-- [Skipping all properties of the class](#skipping-all-properties-of-the-class)
+- [yoolabs class-transformer](#yoolabs-class-transformer)
+- [Main Introduction](#main-introduction)
+- [Table of contents](#table-of-contents)
+- [What is class-transformer⬆](#what-is-class-transformer)
+- [Installation⬆](#installation)
+  - [Node.js⬆](#nodejs)
+  - [Browser⬆](#browser)
+- [Methods⬆](#methods)
+  - [plainToClass⬆](#plaintoclass)
+  - [plainToClassFromExist⬆](#plaintoclassfromexist)
+  - [classToPlain⬆](#classtoplain)
+  - [classToClass⬆](#classtoclass)
+  - [serialize⬆](#serialize)
+  - [deserialize and deserializeArray⬆](#deserialize-and-deserializearray)
+- [Enforcing type-safe instance⬆](#enforcing-type-safe-instance)
+- [Working with nested objects⬆](#working-with-nested-objects)
+  - [Providing more than one type option⬆](#providing-more-than-one-type-option)
+- [Exposing getters and method return values⬆](#exposing-getters-and-method-return-values)
+- [Exposing properties with different names⬆](#exposing-properties-with-different-names)
+- [Skipping specific properties⬆](#skipping-specific-properties)
+- [Skipping depend of operation⬆](#skipping-depend-of-operation)
+- [Skipping all properties of the class⬆](#skipping-all-properties-of-the-class)
 - [Exposing/Excluding properties of subobjects](#exposingexcluding-properties-of-subobjects)
-- [Skipping private properties, or some prefixed properties](#skipping-private-properties-or-some-prefixed-properties)
-- [Using groups to control excluded properties](#using-groups-to-control-excluded-properties)
-- [Using versioning to control exposed and excluded properties](#using-versioning-to-control-exposed-and-excluded-properties)
-- [Сonverting date strings into Date objects](#сonverting-date-strings-into-date-objects)
-- [Working with arrays](#working-with-arrays)
-- [Additional data transformation](#additional-data-transformation)
-  - [Basic usage](#basic-usage)
-  - [Advanced usage](#advanced-usage)
-- [Other decorators](#other-decorators)
-- [Working with generics](#working-with-generics)
-- [Implicit type conversion](#implicit-type-conversion)
-- [How does it handle circular references?](#how-does-it-handle-circular-references)
-- [Example with Angular2](#example-with-angular2)
-- [Samples](#samples)
-- [Release notes](#release-notes)
+- [Skipping private properties, or some prefixed properties⬆](#skipping-private-properties-or-some-prefixed-properties)
+- [Using groups to control excluded properties⬆](#using-groups-to-control-excluded-properties)
+- [Using versioning to control exposed and excluded properties⬆](#using-versioning-to-control-exposed-and-excluded-properties)
+- [Сonverting date strings into Date objects⬆](#сonverting-date-strings-into-date-objects)
+- [Working with arrays⬆](#working-with-arrays)
+- [Additional data transformation⬆](#additional-data-transformation)
+  - [Basic usage⬆](#basic-usage)
+  - [Advanced usage⬆](#advanced-usage)
+- [Other decorators⬆](#other-decorators)
+- [Working with generics⬆](#working-with-generics)
+- [Implicit type conversion⬆](#implicit-type-conversion)
+- [How does it handle circular references?⬆](#how-does-it-handle-circular-references)
+- [Example with Angular2⬆](#example-with-angular2)
+- [Samples⬆](#samples)
+- [Release notes⬆](#release-notes)
 
 ## What is class-transformer[⬆](#table-of-contents)
 
@@ -229,7 +233,7 @@ Now you can use `users[0].getName()` and `users[0].isAdult()` methods.
 This method transforms a plain javascript object to instance of specific class.
 
 ```typescript
-import { plainToClass } from 'class-transformer';
+import { plainToClass } from '@nestjs/class-transformer';
 
 let users = plainToClass(User, userJson); // to convert user plain object a single user. also supports arrays
 ```
@@ -250,7 +254,7 @@ let mixedUser = plainToClassFromExist(defaultUser, user); // mixed user should h
 This method transforms your class object back to plain javascript object, that can be `JSON.stringify` later.
 
 ```typescript
-import { classToPlain } from 'class-transformer';
+import { classToPlain } from '@nestjs/class-transformer';
 let photo = classToPlain(photo);
 ```
 
@@ -260,7 +264,7 @@ This method transforms your class object into a new instance of the class object
 This may be treated as deep clone of your objects.
 
 ```typescript
-import { classToClass } from 'class-transformer';
+import { classToClass } from '@nestjs/class-transformer';
 let photo = classToClass(photo);
 ```
 
@@ -271,7 +275,7 @@ You can also use an `ignoreDecorators` option in transformation options to ignor
 You can serialize your model right to json using `serialize` method:
 
 ```typescript
-import { serialize } from 'class-transformer';
+import { serialize } from '@nestjs/class-transformer';
 let photo = serialize(photo);
 ```
 
@@ -282,14 +286,14 @@ let photo = serialize(photo);
 You can deserialize your model from json using the `deserialize` method:
 
 ```typescript
-import { deserialize } from 'class-transformer';
+import { deserialize } from '@nestjs/class-transformer';
 let photo = deserialize(Photo, photo);
 ```
 
 To make deserialization work with arrays, use the `deserializeArray` method:
 
 ```typescript
-import { deserializeArray } from 'class-transformer';
+import { deserializeArray } from '@nestjs/class-transformer';
 let photos = deserializeArray(Photo, photos);
 ```
 
@@ -299,7 +303,7 @@ The default behaviour of the `plainToClass` method is to set _all_ properties fr
 even those which are not specified in the class.
 
 ```typescript
-import { plainToClass } from 'class-transformer';
+import { plainToClass } from '@nestjs/class-transformer';
 
 class User {
   id: number;
@@ -326,7 +330,7 @@ If this behaviour does not suit your needs, you can use the `excludeExtraneousVa
 in the `plainToClass` method while _exposing all your class properties_ as a requirement.
 
 ```typescript
-import { Expose, plainToClass } from 'class-transformer';
+import { Expose, plainToClass } from '@nestjs/class-transformer';
 
 class User {
   @Expose() id: number;
@@ -340,7 +344,9 @@ const fromPlainUser = {
   lastName: 'Khudoiberdiev',
 };
 
-console.log(plainToClass(User, fromPlainUser, { excludeExtraneousValues: true }));
+console.log(
+  plainToClass(User, fromPlainUser, { excludeExtraneousValues: true })
+);
 
 // User {
 //   id: undefined,
@@ -361,7 +367,7 @@ Lets say we have an album with photos.
 And we are trying to convert album plain object to class object:
 
 ```typescript
-import { Type, plainToClass } from 'class-transformer';
+import { Type, plainToClass } from '@nestjs/class-transformer';
 
 export class Album {
   id: number;
@@ -409,7 +415,7 @@ the additional property `__type`. This property is removed during transformation
 ```
 
 ```typescript
-import { Type, plainToClass } from 'class-transformer';
+import { Type, plainToClass } from '@nestjs/class-transformer';
 
 export abstract class Photo {
   id: number;
@@ -457,7 +463,7 @@ in the options to keep the discriminator property also inside your resulting cla
 You can expose what your getter or method return by setting an `@Expose()` decorator to those getters or methods:
 
 ```typescript
-import { Expose } from 'class-transformer';
+import { Expose } from '@nestjs/class-transformer';
 
 export class User {
   id: number;
@@ -483,7 +489,7 @@ If you want to expose some of the properties with a different name,
 you can do that by specifying a `name` option to `@Expose` decorator:
 
 ```typescript
-import { Expose } from 'class-transformer';
+import { Expose } from '@nestjs/class-transformer';
 
 export class User {
   @Expose({ name: 'uid' })
@@ -509,7 +515,7 @@ Sometimes you want to skip some properties during transformation.
 This can be done using `@Exclude` decorator:
 
 ```typescript
-import { Exclude } from 'class-transformer';
+import { Exclude } from '@nestjs/class-transformer';
 
 export class User {
   id: number;
@@ -528,7 +534,7 @@ Now when you transform a User, the `password` property will be skipped and not b
 You can control on what operation you will exclude a property. Use `toClassOnly` or `toPlainOnly` options:
 
 ```typescript
-import { Exclude } from 'class-transformer';
+import { Exclude } from '@nestjs/class-transformer';
 
 export class User {
   id: number;
@@ -547,7 +553,7 @@ Now `password` property will be excluded only during `classToPlain` operation. V
 You can skip all properties of the class, and expose only those are needed explicitly:
 
 ```typescript
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose } from '@nestjs/class-transformer';
 
 @Exclude()
 export class User {
@@ -565,7 +571,7 @@ Now `id` and `email` will be exposed, and password will be excluded during trans
 Alternatively, you can set exclusion strategy during transformation:
 
 ```typescript
-import { classToPlain } from 'class-transformer';
+import { classToPlain } from '@nestjs/class-transformer';
 let photo = classToPlain(photo, { strategy: 'excludeAll' });
 ```
 
@@ -600,7 +606,10 @@ user.data = { prop: 'test', otherProp: 23 };
 let plain1 = classToPlain(user, { strategy: 'excludeAll' });
 
 // plain2.data will be {prop:'test',otherProp:23}
-let plain2 = classToPlain(user, { strategy: 'excludeAll', nestedStrategy: 'exposeAll' });
+let plain2 = classToPlain(user, {
+  strategy: 'excludeAll',
+  nestedStrategy: 'exposeAll',
+});
 ```
 
 ## Skipping private properties, or some prefixed properties[⬆](#table-of-contents)
@@ -609,7 +618,7 @@ If you name your private properties with a prefix, lets say with `_`,
 then you can exclude such properties from transformation too:
 
 ```typescript
-import { classToPlain } from 'class-transformer';
+import { classToPlain } from '@nestjs/class-transformer';
 let photo = classToPlain(photo, { excludePrefixes: ['_'] });
 ```
 
@@ -618,7 +627,7 @@ You can pass any number of prefixes and all properties that begin with these pre
 For example:
 
 ```typescript
-import { Expose, classToPlain } from 'class-transformer';
+import { Expose, classToPlain } from '@nestjs/class-transformer';
 
 export class User {
   id: number;
@@ -652,7 +661,7 @@ const plainUser = classToPlain(user, { excludePrefixes: ['_'] });
 You can use groups to control what data will be exposed and what will not be:
 
 ```typescript
-import { Exclude, Expose, classToPlain } from 'class-transformer';
+import { Exclude, Expose, classToPlain } from '@nestjs/class-transformer';
 
 export class User {
   id: number;
@@ -676,7 +685,7 @@ If you are building an API that has different versions, class-transformer has ex
 You can control which properties of your model should be exposed or excluded in what version. Example:
 
 ```typescript
-import { Exclude, Expose, classToPlain } from 'class-transformer';
+import { Exclude, Expose, classToPlain } from '@nestjs/class-transformer';
 
 export class User {
   id: number;
@@ -704,7 +713,7 @@ And you want to create a real javascript Date object from it.
 You can do it simply by passing a Date object to the `@Type` decorator:
 
 ```typescript
-import { Type } from 'class-transformer';
+import { Type } from '@nestjs/class-transformer';
 
 export class User {
   id: number;
@@ -727,7 +736,7 @@ When you are using arrays you must provide a type of the object that array conta
 This type, you specify in a `@Type()` decorator:
 
 ```typescript
-import { Type } from 'class-transformer';
+import { Type } from '@nestjs/class-transformer';
 
 export class Photo {
   id: number;
@@ -742,7 +751,7 @@ export class Photo {
 You can also use custom array types:
 
 ```typescript
-import { Type } from 'class-transformer';
+import { Type } from '@nestjs/class-transformer';
 
 export class AlbumCollection extends Array<Album> {
   // custom array functions ...
@@ -792,7 +801,7 @@ For example, you want to make your `Date` object to be a `moment` object when yo
 transforming object from plain to class:
 
 ```typescript
-import { Transform } from 'class-transformer';
+import { Transform } from '@nestjs/class-transformer';
 import * as moment from 'moment';
 import { Moment } from 'moment';
 
@@ -879,7 +888,7 @@ the exposed variables. email property is also exposed because we metioned the gr
 Generics are not supported because TypeScript does not have good reflection abilities yet.
 Once TypeScript team provide us better runtime type reflection tools, generics will be implemented.
 There are some tweaks however you can use, that maybe can solve your problem.
-[Checkout this example.](https://github.com/pleerock/class-transformer/tree/master/sample/sample4-generics)
+[Checkout this example.](https://github.com/nestjs/class-transformer/tree/master/sample/sample4-generics)
 
 ## Implicit type conversion[⬆](#table-of-contents)
 
@@ -895,8 +904,16 @@ class MyPayload {
   prop: string;
 }
 
-const result1 = plainToClass(MyPayload, { prop: 1234 }, { enableImplicitConversion: true });
-const result2 = plainToClass(MyPayload, { prop: 1234 }, { enableImplicitConversion: false });
+const result1 = plainToClass(
+  MyPayload,
+  { prop: 1234 },
+  { enableImplicitConversion: true }
+);
+const result2 = plainToClass(
+  MyPayload,
+  { prop: 1234 },
+  { enableImplicitConversion: false }
+);
 
 /**
  *  result1 will be `{ prop: "1234" }` - notice how the prop value has been converted to string.
@@ -916,7 +933,7 @@ Circular references are not ignored only during `classToClass` operation.
 Lets say you want to download users and want them automatically to be mapped to the instances of `User` class.
 
 ```typescript
-import { plainToClass } from 'class-transformer';
+import { plainToClass } from '@nestjs/class-transformer';
 
 this.http
   .get('users.json')
@@ -931,13 +948,12 @@ this.http
 You can also inject a class `ClassTransformer` as a service in `providers`, and use its methods.
 
 Example how to use with angular 2 in [plunker](http://plnkr.co/edit/Mja1ZYAjVySWASMHVB9R).
-Source code is [here](https://github.com/pleerock/class-transformer-demo).
 
 ## Samples[⬆](#table-of-contents)
 
-Take a look on samples in [./sample](https://github.com/pleerock/class-transformer/tree/master/sample) for more examples of
+Take a look on samples in [./sample](https://github.com/nestjs/class-transformer/tree/master/sample) for more examples of
 usages.
 
 ## Release notes[⬆](#table-of-contents)
 
-See information about breaking changes and release notes [here](https://github.com/typestack/class-transformer/blob/master/CHANGELOG.md).
+See information about breaking changes and release notes [here](https://github.com/nestjs/class-transformer/blob/master/CHANGELOG.md).

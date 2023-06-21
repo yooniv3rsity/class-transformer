@@ -6,17 +6,27 @@ import { ClassTransformOptions } from '../interfaces';
  *
  * Can be applied to functions and getters/setters only.
  */
-export function TransformInstanceToPlain(params?: ClassTransformOptions): MethodDecorator {
-  return function (target: Record<string, any>, propertyKey: string | Symbol, descriptor: PropertyDescriptor): void {
+export function TransformInstanceToPlain(
+  params?: ClassTransformOptions
+): MethodDecorator {
+  return function (
+    target: Record<string, any>,
+    propertyKey: string | Symbol,
+    descriptor: PropertyDescriptor
+  ): void {
     const classTransformer: ClassTransformer = new ClassTransformer();
     const originalMethod = descriptor.value;
 
     descriptor.value = function (...args: any[]): Record<string, any> {
       const result: any = originalMethod.apply(this, args);
       const isPromise =
-        !!result && (typeof result === 'object' || typeof result === 'function') && typeof result.then === 'function';
+        !!result &&
+        (typeof result === 'object' || typeof result === 'function') &&
+        typeof result.then === 'function';
       return isPromise
-        ? result.then((data: any) => classTransformer.instanceToPlain(data, params))
+        ? result.then((data: any) =>
+            classTransformer.instanceToPlain(data, params)
+          )
         : classTransformer.instanceToPlain(result, params);
     };
   };

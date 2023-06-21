@@ -174,7 +174,9 @@ describe('filtering by transformation option', () => {
       lastName: string;
     }
 
-    expect(instanceToPlain(new User(), { exposeUnsetFields: false })).toEqual({});
+    expect(instanceToPlain(new User(), { exposeUnsetFields: false })).toEqual(
+      {}
+    );
     expect(instanceToPlain(new User(), { exposeUnsetFields: true })).toEqual({
       firstName: undefined,
       lastName: undefined,

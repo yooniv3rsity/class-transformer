@@ -8,7 +8,9 @@ import { ExcludeOptions } from '../interfaces';
  *
  * Can be applied to class definitions and properties.
  */
-export function Exclude(options: ExcludeOptions = {}): PropertyDecorator & ClassDecorator {
+export function Exclude(
+  options: ExcludeOptions = {}
+): PropertyDecorator & ClassDecorator {
   /**
    * NOTE: The `propertyName` property must be marked as optional because
    * this decorator used both as a class and a property decorator and the

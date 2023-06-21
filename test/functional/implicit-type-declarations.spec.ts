@@ -33,8 +33,14 @@ describe('implicit type conversion', () => {
       { enableImplicitConversion: false }
     );
 
-    expect(result1).toEqual({ implicitTypeNumber: 100, implicitTypeString: '133123' });
-    expect(result2).toEqual({ implicitTypeNumber: '100', implicitTypeString: 133123 });
+    expect(result1).toEqual({
+      implicitTypeNumber: 100,
+      implicitTypeString: '133123',
+    });
+    expect(result2).toEqual({
+      implicitTypeNumber: '100',
+      implicitTypeString: 133123,
+    });
   });
 });
 
@@ -64,7 +70,9 @@ describe('implicit and explicity type declarations', () => {
 
   it('should use implicitly defined design:type to convert value when no @Type decorator is used', () => {
     expect(result.implicitTypeViaOtherDecorator).toBeInstanceOf(Date);
-    expect(result.implicitTypeViaOtherDecorator.getTime()).toEqual(new Date('2018-12-24T12:00:00Z').getTime());
+    expect(result.implicitTypeViaOtherDecorator.getTime()).toEqual(
+      new Date('2018-12-24T12:00:00Z').getTime()
+    );
   });
 
   it('should use implicitly defined design:type to convert value when empty @Type() decorator is used', () => {
@@ -120,7 +128,9 @@ describe('plainToInstance transforms built-in primitive types properly', () => {
 
   it('should recognize and convert to Date', () => {
     expect(result.date).toBeInstanceOf(Date);
-    expect(result.date.getTime()).toEqual(new Date('2018-12-24T12:00:00Z').getTime());
+    expect(result.date.getTime()).toEqual(
+      new Date('2018-12-24T12:00:00Z').getTime()
+    );
   });
 
   it('should recognize and convert to string', () => {

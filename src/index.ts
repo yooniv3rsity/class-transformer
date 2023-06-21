@@ -1,6 +1,5 @@
 import { ClassTransformer } from './ClassTransformer';
-import { ClassTransformOptions } from './interfaces';
-import { ClassConstructor } from './interfaces';
+import { ClassConstructor, ClassTransformOptions } from './interfaces';
 
 export { ClassTransformer } from './ClassTransformer';
 
@@ -8,8 +7,8 @@ export { getGlobal } from './utils';
 export { defaultMetadataStorage } from './storage';
 
 export * from './decorators';
-export * from './interfaces';
 export * from './enums';
+export * from './interfaces';
 
 const classTransformer = new ClassTransformer();
 
@@ -18,8 +17,14 @@ const classTransformer = new ClassTransformer();
  *
  * @deprecated Function name changed, use the `instanceToPlain` method instead.
  */
-export function classToPlain<T>(object: T, options?: ClassTransformOptions): Record<string, any>;
-export function classToPlain<T>(object: T[], options?: ClassTransformOptions): Record<string, any>[];
+export function classToPlain<T>(
+  object: T,
+  options?: ClassTransformOptions
+): Record<string, any>;
+export function classToPlain<T>(
+  object: T[],
+  options?: ClassTransformOptions
+): Record<string, any>[];
 export function classToPlain<T>(
   object: T | T[],
   options?: ClassTransformOptions
@@ -30,8 +35,14 @@ export function classToPlain<T>(
 /**
  * Converts class (constructor) object to plain (literal) object. Also works with arrays.
  */
-export function instanceToPlain<T>(object: T, options?: ClassTransformOptions): Record<string, any>;
-export function instanceToPlain<T>(object: T[], options?: ClassTransformOptions): Record<string, any>[];
+export function instanceToPlain<T>(
+  object: T,
+  options?: ClassTransformOptions
+): Record<string, any>;
+export function instanceToPlain<T>(
+  object: T[],
+  options?: ClassTransformOptions
+): Record<string, any>[];
 export function instanceToPlain<T>(
   object: T | T[],
   options?: ClassTransformOptions
@@ -69,17 +80,37 @@ export function classToPlainFromExist<T>(
  *
  * @deprecated Function name changed, use the `plainToInstance` method instead.
  */
-export function plainToClass<T, V>(cls: ClassConstructor<T>, plain: V[], options?: ClassTransformOptions): T[];
-export function plainToClass<T, V>(cls: ClassConstructor<T>, plain: V, options?: ClassTransformOptions): T;
-export function plainToClass<T, V>(cls: ClassConstructor<T>, plain: V | V[], options?: ClassTransformOptions): T | T[] {
+export function plainToClass<T, V>(
+  cls: ClassConstructor<T>,
+  plain: V[],
+  options?: ClassTransformOptions
+): T[];
+export function plainToClass<T, V>(
+  cls: ClassConstructor<T>,
+  plain: V,
+  options?: ClassTransformOptions
+): T;
+export function plainToClass<T, V>(
+  cls: ClassConstructor<T>,
+  plain: V | V[],
+  options?: ClassTransformOptions
+): T | T[] {
   return classTransformer.plainToInstance(cls, plain as any, options);
 }
 
 /**
  * Converts plain (literal) object to class (constructor) object. Also works with arrays.
  */
-export function plainToInstance<T, V>(cls: ClassConstructor<T>, plain: V[], options?: ClassTransformOptions): T[];
-export function plainToInstance<T, V>(cls: ClassConstructor<T>, plain: V, options?: ClassTransformOptions): T;
+export function plainToInstance<T, V>(
+  cls: ClassConstructor<T>,
+  plain: V[],
+  options?: ClassTransformOptions
+): T[];
+export function plainToInstance<T, V>(
+  cls: ClassConstructor<T>,
+  plain: V,
+  options?: ClassTransformOptions
+): T;
 export function plainToInstance<T, V>(
   cls: ClassConstructor<T>,
   plain: V | V[],
@@ -95,18 +126,39 @@ export function plainToInstance<T, V>(
  *
  * @deprecated This function is being removed. The current implementation is incorrect as it modifies the source object.
  */
-export function plainToClassFromExist<T, V>(clsObject: T[], plain: V[], options?: ClassTransformOptions): T[];
-export function plainToClassFromExist<T, V>(clsObject: T, plain: V, options?: ClassTransformOptions): T;
-export function plainToClassFromExist<T, V>(clsObject: T, plain: V | V[], options?: ClassTransformOptions): T | T[] {
+export function plainToClassFromExist<T, V>(
+  clsObject: T[],
+  plain: V[],
+  options?: ClassTransformOptions
+): T[];
+export function plainToClassFromExist<T, V>(
+  clsObject: T,
+  plain: V,
+  options?: ClassTransformOptions
+): T;
+export function plainToClassFromExist<T, V>(
+  clsObject: T,
+  plain: V | V[],
+  options?: ClassTransformOptions
+): T | T[] {
   return classTransformer.plainToClassFromExist(clsObject, plain, options);
 }
 
 /**
  * Converts class (constructor) object to new class (constructor) object. Also works with arrays.
  */
-export function instanceToInstance<T>(object: T, options?: ClassTransformOptions): T;
-export function instanceToInstance<T>(object: T[], options?: ClassTransformOptions): T[];
-export function instanceToInstance<T>(object: T | T[], options?: ClassTransformOptions): T | T[] {
+export function instanceToInstance<T>(
+  object: T,
+  options?: ClassTransformOptions
+): T;
+export function instanceToInstance<T>(
+  object: T[],
+  options?: ClassTransformOptions
+): T[];
+export function instanceToInstance<T>(
+  object: T | T[],
+  options?: ClassTransformOptions
+): T | T[] {
   return classTransformer.instanceToInstance(object, options);
 }
 
@@ -117,9 +169,21 @@ export function instanceToInstance<T>(object: T | T[], options?: ClassTransformO
  *
  * @deprecated This function is being removed. The current implementation is incorrect as it modifies the source object.
  */
-export function classToClassFromExist<T>(object: T, fromObject: T, options?: ClassTransformOptions): T;
-export function classToClassFromExist<T>(object: T, fromObjects: T[], options?: ClassTransformOptions): T[];
-export function classToClassFromExist<T>(object: T, fromObject: T | T[], options?: ClassTransformOptions): T | T[] {
+export function classToClassFromExist<T>(
+  object: T,
+  fromObject: T,
+  options?: ClassTransformOptions
+): T;
+export function classToClassFromExist<T>(
+  object: T,
+  fromObjects: T[],
+  options?: ClassTransformOptions
+): T[];
+export function classToClassFromExist<T>(
+  object: T,
+  fromObject: T | T[],
+  options?: ClassTransformOptions
+): T | T[] {
   return classTransformer.classToClassFromExist(object, fromObject, options);
 }
 
@@ -131,9 +195,18 @@ export function classToClassFromExist<T>(object: T, fromObject: T | T[], options
  * JSON.stringify(instanceToPlain(object, options))
  * ```
  */
-export function serialize<T>(object: T, options?: ClassTransformOptions): string;
-export function serialize<T>(object: T[], options?: ClassTransformOptions): string;
-export function serialize<T>(object: T | T[], options?: ClassTransformOptions): string {
+export function serialize<T>(
+  object: T,
+  options?: ClassTransformOptions
+): string;
+export function serialize<T>(
+  object: T[],
+  options?: ClassTransformOptions
+): string;
+export function serialize<T>(
+  object: T | T[],
+  options?: ClassTransformOptions
+): string {
   return classTransformer.serialize(object, options);
 }
 
@@ -145,7 +218,11 @@ export function serialize<T>(object: T | T[], options?: ClassTransformOptions): 
  * instanceToClass(cls, JSON.parse(json), options)
  * ```
  */
-export function deserialize<T>(cls: ClassConstructor<T>, json: string, options?: ClassTransformOptions): T {
+export function deserialize<T>(
+  cls: ClassConstructor<T>,
+  json: string,
+  options?: ClassTransformOptions
+): T {
   return classTransformer.deserialize(cls, json, options);
 }
 
@@ -158,6 +235,10 @@ export function deserialize<T>(cls: ClassConstructor<T>, json: string, options?:
  * ```
  *
  */
-export function deserializeArray<T>(cls: ClassConstructor<T>, json: string, options?: ClassTransformOptions): T[] {
+export function deserializeArray<T>(
+  cls: ClassConstructor<T>,
+  json: string,
+  options?: ClassTransformOptions
+): T[] {
   return classTransformer.deserializeArray(cls, json, options);
 }

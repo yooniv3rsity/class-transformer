@@ -14,6 +14,7 @@
 This fork adds custom functionality to class transformer.
 
 - [Exposing/Excluding properties of subobjects](#exposingexcluding-properties-of-subobjects)
+- export TransformOperationExecutor
 
 ## Main Introduction
 

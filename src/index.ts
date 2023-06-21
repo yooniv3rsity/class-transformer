@@ -2,6 +2,7 @@ import { ClassTransformer } from './ClassTransformer';
 import { ClassConstructor, ClassTransformOptions } from './interfaces';
 
 export { ClassTransformer } from './ClassTransformer';
+export { TransformOperationExecutor } from './TransformOperationExecutor';
 
 export { getGlobal } from './utils';
 export { defaultMetadataStorage } from './storage';

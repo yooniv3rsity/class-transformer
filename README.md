@@ -17,6 +17,7 @@ This fork adds custom functionality to class transformer.
 - export TransformOperationExecutor
 - add an extra argument "dependencies", which will be passed to custom transform functions
 - pass TransformOperationExecutor instance to TransformFn so that custom processing of data is possible
+- new option transformationHandler allows to specify a custom handler for nested transformations, which will be executed instead of directly recursively calling TransformOperationExecutor.transform
 
 ## Main Introduction
 

@@ -46,6 +46,31 @@ export class TransformOperationExecutor {
     isMap: boolean,
     level = 0
   ): any {
+    if (this.options.transformationHandler) {
+      return this.options.transformationHandler(
+        { source, value, targetType, arrayType, isMap, level },
+        this
+      );
+    } else {
+      return this.doTransform(
+        source,
+        value,
+        targetType,
+        arrayType,
+        isMap,
+        level
+      );
+    }
+  }
+
+  doTransform(
+    source: Record<string, any> | Record<string, any>[] | any,
+    value: Record<string, any> | Record<string, any>[] | any,
+    targetType: Function | TypeMetadata,
+    arrayType: Function,
+    isMap: boolean,
+    level = 0
+  ): any {
     if (Array.isArray(value) || value instanceof Set) {
       const newValue =
         arrayType &&

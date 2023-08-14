@@ -102,6 +102,8 @@ export class TransformOperationExecutor {
                 newObject: newValue,
                 object: subValue,
                 property: undefined,
+                dependencies: this.dependencies,
+                executor: this,
               };
               const newType = targetType.typeFunction(options);
               realTargetType === undefined
@@ -115,11 +117,10 @@ export class TransformOperationExecutor {
               realTargetType = subValue.constructor;
             }
             if (this.transformationType === TransformationType.CLASS_TO_PLAIN) {
-              subValue[
-                targetType.options.discriminator.property
-              ] = targetType.options.discriminator.subTypes.find(
-                subType => subType.value === subValue.constructor
-              ).name;
+              subValue[targetType.options.discriminator.property] =
+                targetType.options.discriminator.subTypes.find(
+                  subType => subType.value === subValue.constructor
+                ).name;
             }
           } else {
             realTargetType = targetType;
@@ -248,10 +249,11 @@ export class TransformOperationExecutor {
           propertyName = key;
         if (!this.options.ignoreDecorators && targetType) {
           if (this.transformationType === TransformationType.PLAIN_TO_CLASS) {
-            const exposeMetadata = defaultMetadataStorage.findExposeMetadataByCustomName(
-              targetType as Function,
-              key
-            );
+            const exposeMetadata =
+              defaultMetadataStorage.findExposeMetadataByCustomName(
+                targetType as Function,
+                key
+              );
             if (exposeMetadata) {
               propertyName = exposeMetadata.propertyName;
               newValueKey = exposeMetadata.propertyName;
@@ -309,6 +311,8 @@ export class TransformOperationExecutor {
               newObject: newValue,
               object: value,
               property: propertyName,
+              dependencies: this.dependencies,
+              executor: this,
             };
             const newType = metadata.typeFunction
               ? metadata.typeFunction(options)
@@ -357,11 +361,10 @@ export class TransformOperationExecutor {
                   this.transformationType === TransformationType.CLASS_TO_PLAIN
                 ) {
                   if (subValue) {
-                    subValue[
-                      metadata.options.discriminator.property
-                    ] = metadata.options.discriminator.subTypes.find(
-                      subType => subType.value === subValue.constructor
-                    ).name;
+                    subValue[metadata.options.discriminator.property] =
+                      metadata.options.discriminator.subTypes.find(
+                        subType => subType.value === subValue.constructor
+                      ).name;
                   }
                 }
               } else {

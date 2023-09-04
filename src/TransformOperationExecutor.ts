@@ -23,6 +23,7 @@ export class TransformOperationExecutor {
   // -------------------------------------------------------------------------
 
   private recursionStack = new Set<Record<string, any>>();
+  private dependencies: ClassTransformerExternalDependencies;
 
   // -------------------------------------------------------------------------
   // Constructor
@@ -30,9 +31,10 @@ export class TransformOperationExecutor {
 
   constructor(
     private transformationType: TransformationType,
-    private options: ClassTransformOptions,
-    private dependencies: ClassTransformerExternalDependencies = {}
-  ) {}
+    private options: ClassTransformOptions
+  ) {
+    this.dependencies = options.dependencies || {};
+  }
 
   // -------------------------------------------------------------------------
   // Public Methods

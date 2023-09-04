@@ -1,4 +1,5 @@
 import { ExecuteTransformationHandler } from './execute-transformation-handler.interface';
+import { ClassTransformerExternalDependencies } from './external-dependencies.interface';
 import { TargetMap } from './target-map.interface';
 
 /**
@@ -89,4 +90,9 @@ export interface ClassTransformOptions {
    * This allows to specify a custom handler that will be executed and can decide how to process the specified data.
    */
   transformationHandler?: ExecuteTransformationHandler;
+
+  /**
+   * Custom dependencies that will be passed to custom transformation handlers and Type factory functions
+   */
+  dependencies?: ClassTransformerExternalDependencies;
 }

@@ -15,9 +15,11 @@ This fork adds custom functionality to class transformer.
 
 - [Exposing/Excluding properties of subobjects](#exposingexcluding-properties-of-subobjects)
 - export TransformOperationExecutor
-- add an extra argument "dependencies", which will be passed to:
+- <s>add an extra argument "dependencies", which will be passed to: (0.6.0)</s>
+- add an extra options property "dependencies", which will be passed to: (0.7.0)
   - custom transform functions
   - custom type factory function
+  - replaces extra argument "dependencies" in a way that is compatible with 3rd-party libs where transformation function call can't be modified.
 - pass TransformOperationExecutor reference so that custom processing of data is possible to:
   - custom transform functions
   - custom type factory function

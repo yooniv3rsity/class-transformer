@@ -37,6 +37,28 @@ export namespace TransformExecutionHelper {
 		}
 	}
 
+	export function createArrayLike(c:TransformOperationArgs, transformationType: TransformationType): Array<any> | Set<any> {
+		const {arrayType} = c;
+		if(arrayType && transformationType === TransformationType.PLAIN_TO_CLASS) {
+			const array = new (arrayType as any)();
+			// fallback in case an incompatible constructor was set
+			if (!(array instanceof Set) && !(Array.isArray(array))) {
+				return [];
+			}
+			return array;
+		} else {
+			return []
+		}
+	}
+	
+	export function addPropertyToArrayLike( arrayLike: Array<any>|Set<any>, value: any) {
+		if (arrayLike instanceof Set) {
+			arrayLike.add(value);
+		} else {
+			arrayLike.push(value);
+		}
+	}
+
 	export function getPropertyFromStructure( targetStructure: ObjectLikeStructure, key: string	): any {
 		if (targetStructure instanceof Map) return targetStructure.get(key);
 		else return targetStructure[key];

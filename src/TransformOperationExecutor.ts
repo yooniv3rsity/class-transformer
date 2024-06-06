@@ -2,17 +2,10 @@
 import { RecursionStack } from './RecursionStack';
 import { TransformExecutionHelper } from './TransformExecutionHelper';
 import { TransformationType, TypedStructure } from "./enums";
-import { ClassTransformOptions, ClassTransformerExternalDependencies, ObjectLikeStructure, TransformOperationArgs, TypeHelpOptions } from "./interfaces";
+import { ClassTransformOptions, ClassTransformerExternalDependencies, ObjectLikeStructure, TransformOperationArgs, TypeHelpOptions, TypeMetadata } from "./interfaces";
 import { defaultMetadataStorage } from "./storage";
 import { getGlobal, isPromise } from "./utils";
 
-function instantiateArrayType(arrayType: Function): Array<any> | Set<any> {
-	const array = new (arrayType as any)();
-	if (!(array instanceof Set) && !("push" in array)) {
-		return [];
-	}
-	return array;
-}
 
 export class TransformOperationExecutor {
 	// -------------------------------------------------------------------------
@@ -83,6 +76,7 @@ export class TransformOperationExecutor {
 		}
 	}
 
+	// called when transforming Object or Map
 	private doTransform_object(c:TransformOperationArgs): any {
 		c = this.doTransform_object_normalizeTargetType(c);
 		
@@ -220,6 +214,7 @@ export class TransformOperationExecutor {
 		return subValue;
 	}
 
+	// determine the targetType for a property + if the type is nested within a structure like Array/Map
 	private doTransform_object_determinePropertyType(
 		c: TransformOperationArgs,
 		subValue: any,
@@ -228,11 +223,15 @@ export class TransformOperationExecutor {
 		typeHelpOpts:TypeHelpOptions,
 	) {
 		let type: any = undefined;
-		let structureType: TypedStructure = (subValue instanceof Map) ? TypedStructure.Map : TypedStructure.Array;
+		let structureType: TypedStructure|null = null;
+		if(subValue instanceof Map) structureType = TypedStructure.Map;
+		else if(subValue instanceof Array) structureType = TypedStructure.Array;
 
 		if (c.targetType && c.isMap) {
+			// currently processing property of a Map
 			type = c.targetType;
 		} else if (c.targetType) {
+			// currently processing property of something other than a Map
 			const metadata = defaultMetadataStorage.findTypeMetadata( c.targetType as Function, propertyName );
 			if (metadata) {
 				const newType = metadata.typeFunction ? metadata.typeFunction(typeHelpOpts) : metadata.reflectedType;
@@ -258,6 +257,44 @@ export class TransformOperationExecutor {
 			}
 		}
 		return { type, structureType };
+	}
+	
+	private doTransform_ArrayLike_determineEntryType(targetType: Function | TypeMetadata | undefined, subValue: any, newValue: any[] | Set<any>) {
+		if (typeof targetType === "function") {
+			return targetType;
+		} else if(!targetType) {
+			return undefined;
+		}
+		
+		const metadata = targetType;
+		
+		if(metadata?.options?.discriminator?.property && metadata.options.discriminator.subTypes) {
+			const discr = metadata.options.discriminator;
+			if (this.transformationType === TransformationType.PLAIN_TO_CLASS) {
+				let realTargetType;
+				realTargetType = discr.subTypes.find(
+					(subType) => subType.name === subValue[discr.property]
+				);
+				const options: TypeHelpOptions = this.createTypeHelpOptions(newValue, subValue, undefined);
+				const newType = metadata.typeFunction(options);
+				if (realTargetType === undefined) realTargetType = newType;
+				else realTargetType = realTargetType.value;
+
+				if (!metadata.options.keepDiscriminatorProperty) delete subValue[discr.property];
+				return realTargetType;
+			} else if (this.transformationType === TransformationType.CLASS_TO_CLASS) {
+				return subValue.constructor;
+			} else if (this.transformationType === TransformationType.CLASS_TO_PLAIN) {
+				// TODO: this looks like a crude way to process data at the same time
+				const match = discr.subTypes.find(
+					(subType) => subType.value === subValue.constructor
+				);
+				subValue[discr.property] = match?.name;
+				return;
+			}
+		} else {
+			return targetType;
+		}
 	}
 
 	private solvePropertyTypeByDiscriminator(value: any, valueKey: string, metadata: any, type: any, subValue: any, newType: any) {
@@ -301,72 +338,30 @@ export class TransformOperationExecutor {
 		};
 	}
 
+	// Called when transforming Array or Set
 	private doTransform_ArrayLike(c:TransformOperationArgs): any {
-		const {source, value, targetType, arrayType} = c;
-		const newValue =
-			arrayType && this.transformationType === TransformationType.PLAIN_TO_CLASS
-			? instantiateArrayType(arrayType)
-			: [];
-		(value as any[]).forEach((subValue, index) => {
+		const {source, targetType} = c;
+		const newArrayLike = TransformExecutionHelper.createArrayLike(c,this.transformationType);
+
+		(c.value as any[]).forEach((subValue, index) => {
 			const subSource = source ? source[index] : undefined;
 			if (!this.recursionStack.has(subValue)) {
-				let realTargetType;
-				if (
-					typeof targetType !== "function" &&
-					targetType?.options?.discriminator?.property &&
-					targetType.options.discriminator.subTypes
-				) {
-					const discr = targetType.options.discriminator;
-					if (this.transformationType === TransformationType.PLAIN_TO_CLASS) {
-						realTargetType = discr.subTypes.find(
-							(subType) => subType.name === subValue[discr.property]
-						);
-						const options: TypeHelpOptions = this.createTypeHelpOptions(newValue, subValue, undefined);
-						const newType = targetType.typeFunction(options);
-						if (realTargetType === undefined) realTargetType = newType;
-						else realTargetType = realTargetType.value;
-						
-						if (!targetType.options.keepDiscriminatorProperty)
-							delete subValue[discr.property];
-					}
-					
-					if (this.transformationType === TransformationType.CLASS_TO_CLASS) {
-						realTargetType = subValue.constructor;
-					}
-					if (this.transformationType === TransformationType.CLASS_TO_PLAIN) {
-						const match = discr.subTypes.find(
-							(subType) => subType.value === subValue.constructor
-						);
-						subValue[discr.property] = match?.name;
-					}
-				} else {
-					realTargetType = targetType;
-				}
-				const value = this.transform({
+				const realTargetType = this.doTransform_ArrayLike_determineEntryType(targetType, subValue, newArrayLike);
+				const transformedSubValue = this.transform({
 					source: subSource,
 					value: subValue,
 					targetType: realTargetType,
 					isMap: subValue instanceof Map,
 					level: c.level! + 1
 				});
-				
-				if (newValue instanceof Set) {
-					newValue.add(value);
-				} else {
-					newValue.push(value);
-				}
-			} else if (
-				this.transformationType === TransformationType.CLASS_TO_CLASS
-			) {
-				if (newValue instanceof Set) {
-					newValue.add(subValue);
-				} else {
-					newValue.push(subValue);
-				}
+				TransformExecutionHelper.addPropertyToArrayLike(newArrayLike, transformedSubValue)
+			} else if (this.transformationType === TransformationType.CLASS_TO_CLASS) {
+				TransformExecutionHelper.addPropertyToArrayLike(newArrayLike, subValue)
 			}
 		});
-		return newValue;
+		return newArrayLike;
 	}
+
 
 	private applyCustomTransformations( value: any, target: Function, key: string, obj: any, transformationType: TransformationType	): boolean {
 		let metadatas = defaultMetadataStorage.findTransformMetadatas(

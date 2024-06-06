@@ -44,6 +44,7 @@ export class ClassTransformer {
    * Converts class (constructor) object to plain (literal) object.
    * Uses given plain object as source object (it means fills given plain object with data from class object).
    * Also works with arrays.
+   * @deprecated This function is being removed.
    */
   classToPlainFromExist<T extends Record<string, any>, P>(
     object: T,
@@ -68,7 +69,7 @@ export class ClassTransformer {
       }
     );
     return executor.transform(
-      plainObject,
+      plainObject as any,
       object,
       undefined,
       undefined,
@@ -140,7 +141,7 @@ export class ClassTransformer {
       }
     );
     return executor.transform(
-      clsObject,
+      clsObject as any,
       plain,
       undefined,
       undefined,
@@ -179,8 +180,9 @@ export class ClassTransformer {
    * Converts class (constructor) object to plain (literal) object.
    * Uses given plain object as source object (it means fills given plain object with data from class object).
    * Also works with arrays.
+   * @deprecated This function is being removed. The current implementation is incorrect as it modifies the source object.
    */
-  classToClassFromExist<T>(
+classToClassFromExist<T>(
     object: T,
     fromObject: T,
     options?: ClassTransformOptions
@@ -203,7 +205,7 @@ export class ClassTransformer {
       }
     );
     return executor.transform(
-      fromObject,
+      fromObject as any,
       object,
       undefined,
       undefined,
@@ -213,35 +215,35 @@ export class ClassTransformer {
   }
 
   /**
-   * Serializes given object to a JSON string.
+   * @deprecated This function is being removed. The current implementation is incorrect as it modifies the source object.
    */
   serialize<T>(object: T, options?: ClassTransformOptions): string;
   serialize<T>(object: T[], options?: ClassTransformOptions): string;
   serialize<T>(object: T | T[], options?: ClassTransformOptions): string {
-    return JSON.stringify(this.instanceToPlain(object, options));
+    return JSON.stringify(this.instanceToPlain(object as any, options));
   }
 
   /**
-   * Deserializes given JSON string to a object of the given class.
+   * @deprecated This function is being removed. The current implementation is incorrect as it modifies the source object.
    */
-  deserialize<T>(
-    cls: ClassConstructor<T>,
+  deserialize(
+    cls: any,
     json: string,
     options?: ClassTransformOptions
-  ): T {
-    const jsonObject: T = JSON.parse(json);
-    return this.plainToInstance(cls, jsonObject, options);
+  ): any {
+    const jsonObject = JSON.parse(json);
+    return this.plainToInstance(cls, jsonObject, options) ;
   }
 
   /**
-   * Deserializes given JSON string to an array of objects of the given class.
+   * @deprecated This function is being removed. The current implementation is incorrect as it modifies the source object.
    */
-  deserializeArray<T>(
-    cls: ClassConstructor<T>,
+  deserializeArray(
+    cls: any,
     json: string,
     options?: ClassTransformOptions
-  ): T[] {
+  ): any {
     const jsonObject: any[] = JSON.parse(json);
-    return this.plainToInstance(cls, jsonObject, options);
+    return this.plainToInstance(cls, jsonObject, options) as any;
   }
 }

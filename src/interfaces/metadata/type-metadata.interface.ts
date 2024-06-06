@@ -1,10 +1,10 @@
 import { TypeHelpOptions, TypeOptions } from '..';
+import { BaseMetadata } from './base-metadata.interface';
 
 /**
  * This object represents metadata assigned to a property via the @Type decorator.
  */
-export interface TypeMetadata {
-  target: Function;
+export interface TypeMetadata extends BaseMetadata {
 
   /**
    * The property name this metadata belongs to on the target (property only).

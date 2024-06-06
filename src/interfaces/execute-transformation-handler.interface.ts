@@ -1,12 +1,13 @@
 import { TransformOperationExecutor } from '../TransformOperationExecutor';
+import { ClassConstructor } from './class-constructor.type';
 import { TypeMetadata } from './metadata/type-metadata.interface';
 
 interface ExecuteTransformationArguments {
-  source: Record<string, any> | Record<string, any>[] | any;
-  value: Record<string, any> | Record<string, any>[] | any;
-  targetType: Function | TypeMetadata;
-  arrayType: Function;
-  isMap: boolean;
+  source: ClassConstructor<any>|undefined;
+  value: Record<string, any> | Record<string, any>[] | any | undefined;
+  targetType: Function | TypeMetadata | undefined;
+  arrayType: Function | undefined;
+  isMap: boolean | undefined;
   level: number;
 }
 

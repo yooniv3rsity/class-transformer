@@ -30,7 +30,7 @@ export function classToPlain<T>(
   object: T | T[],
   options?: ClassTransformOptions
 ): Record<string, any> | Record<string, any>[] {
-  return classTransformer.instanceToPlain(object, options);
+  return classTransformer.instanceToPlain(object as any, options);
 }
 
 /**
@@ -48,7 +48,7 @@ export function instanceToPlain<T>(
   object: T | T[],
   options?: ClassTransformOptions
 ): Record<string, any> | Record<string, any>[] {
-  return classTransformer.instanceToPlain(object, options);
+  return classTransformer.instanceToPlain(object as any, options);
 }
 
 /**
@@ -73,7 +73,7 @@ export function classToPlainFromExist<T>(
   plainObject: Record<string, any> | Record<string, any>[],
   options?: ClassTransformOptions
 ): Record<string, any> | Record<string, any>[] {
-  return classTransformer.classToPlainFromExist(object, plainObject, options);
+  return classTransformer.classToPlainFromExist(object as any, plainObject, options);
 }
 
 /**
@@ -96,7 +96,7 @@ export function plainToClass<T, V>(
   plain: V | V[],
   options?: ClassTransformOptions
 ): T | T[] {
-  return classTransformer.plainToInstance(cls, plain as any, options);
+  return classTransformer.plainToInstance<any,V>(cls, plain as any, options);
 }
 
 /**
@@ -117,7 +117,7 @@ export function plainToInstance<T, V>(
   plain: V | V[],
   options?: ClassTransformOptions
 ): T | T[] {
-  return classTransformer.plainToInstance(cls, plain as any, options);
+  return classTransformer.plainToInstance<any,V>(cls, plain as any, options);
 }
 
 /**
@@ -142,7 +142,7 @@ export function plainToClassFromExist<T, V>(
   plain: V | V[],
   options?: ClassTransformOptions
 ): T | T[] {
-  return classTransformer.plainToClassFromExist(clsObject, plain, options);
+  return classTransformer.plainToClassFromExist<any,V>(clsObject, plain as any, options);
 }
 
 /**

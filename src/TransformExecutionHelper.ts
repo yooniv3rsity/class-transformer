@@ -15,8 +15,8 @@ export namespace TransformExecutionHelper {
 
 	export function createTargetStructure(
 		source: any,
-		isMap: boolean,
-		targetType: Function | TypeMetadata,
+		isMap: boolean | undefined,
+		targetType: Function | TypeMetadata | undefined,
 		transformationType: TransformationType,
 	): ObjectLikeStructure {
 		let targetStructure: ObjectLikeStructure = source ? source : {};
@@ -80,7 +80,7 @@ export namespace TransformExecutionHelper {
  	 // TODO: find out what propertyName + newValueKey actually does
 	export function getTargetPropertyKeyName(
 		originalKey: string,
-		targetType: Function | TypeMetadata,
+		targetType: Function | TypeMetadata | undefined,
 		ignoreDecorators: boolean,
 		transformationType:TransformationType
 	): { propertyName: string; newValueKey: string } {

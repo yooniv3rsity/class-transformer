@@ -9,6 +9,7 @@ export * from './metadata/transform-metadata.interface';
 export * from './metadata/transform-fn-params.interface';
 export * from './metadata/type-metadata.interface';
 export * from './class-constructor.type';
+export * from './object-like-structure.type';
 export * from './class-transformer-options.interface';
 export * from './target-map.interface';
 export * from './type-help-options.interface';

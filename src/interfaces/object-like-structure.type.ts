@@ -1,0 +1,1 @@
+export type ObjectLikeStructure = Record<string, any> | Map<string, any>

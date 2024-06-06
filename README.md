@@ -52,7 +52,7 @@ This tool is super useful on both frontend and backend.
 	* [plainToClass⬆](#plaintoclass)
 	* [plainToClassFromExist⬆](#plaintoclassfromexist)
 	* [classToPlain⬆](#classtoplain)
-	* [classToClass⬆](#classtoclass)
+	* [instanceToInstance⬆](#instancetoinstance)
 	* [serialize⬆](#serialize)
 	* [deserialize and deserializeArray⬆](#deserialize-and-deserializearray)
 * [Enforcing type-safe instance⬆](#enforcing-type-safe-instance)
@@ -275,14 +275,14 @@ import { classToPlain } from 'class-transformer';
 let photo = classToPlain(photo);
 ```
 
-### classToClass[⬆](#table-of-contents)
+### instanceToInstance[⬆](#table-of-contents)
 
 This method transforms your class object into a new instance of the class object.
 This may be treated as deep clone of your objects.
 
 ```typescript
-import { classToClass } from 'class-transformer';
-let photo = classToClass(photo);
+import { instanceToInstance } from 'class-transformer';
+let photo = instanceToInstance(photo);
 ```
 
 You can also use an `ignoreDecorators` option in transformation options to ignore all decorators your classes are using.
@@ -854,7 +854,7 @@ The `@Transform` decorator is given more arguments to let you configure how you 
 | Signature                | Example                                              | Description                                                                           |
 | ------------------------ | ---------------------------------------------------- | ------------------------------------------------------------------------------------- |
 | `@TransformClassToPlain` | `@TransformClassToPlain({ groups: ["user"] })`       | Transform the method return with classToPlain and expose the properties on the class. |
-| `@TransformClassToClass` | `@TransformClassToClass({ groups: ["user"] })`       | Transform the method return with classToClass and expose the properties on the class. |
+| `@TransformInstanceToInstance` | `@TransformInstanceToInstance({ groups: ["user"] })`       | Transform the method return with instanceToInstance and expose the properties on the class. |
 | `@TransformPlainToClass` | `@TransformPlainToClass(User, { groups: ["user"] })` | Transform the method return with plainToClass and expose the properties on the class. |
 
 The above decorators accept one optional argument:
@@ -933,7 +933,7 @@ const result2 = plainToClass(MyPayload, { prop: 1234 }, { enableImplicitConversi
 Circular references are ignored.
 For example, if you are transforming class `User` that contains property `photos` with type of `Photo`,
 and `Photo` contains link `user` to its parent `User`, then `user` will be ignored during transformation.
-Circular references are not ignored only during `classToClass` operation.
+Circular references are not ignored only during `instanceToInstance` operation.
 
 ## Example with Angular2[⬆](#table-of-contents)
 

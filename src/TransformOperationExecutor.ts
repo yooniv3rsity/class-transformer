@@ -99,9 +99,8 @@ export class TransformOperationExecutor {
 				: undefined;
 			
 			// determine a type
-			const typeHelpOptions: TypeHelpOptions = this.createTypeHelpOptions(targetStructure, c.value, propertyName);
 			const { type, structureType } = this.doTransform_object_determinePropertyType( 
-				c, subValue, propertyName, incomingValueDataKey, typeHelpOptions 
+				c, subValue, propertyName, incomingValueDataKey, targetStructure 
 			);
 			const isSubValueMap = structureType === TypedStructure.Map;
 			
@@ -220,13 +219,12 @@ export class TransformOperationExecutor {
 		subValue: any,
 		propertyName: string,
 		parentDataKey: string,
-		typeHelpOpts:TypeHelpOptions,
+		targetStructure: ObjectLikeStructure,
 	) {
 		let type: any = undefined;
 		let structureType: TypedStructure|null = null;
 		if(subValue instanceof Map) structureType = TypedStructure.Map;
-		else if(subValue instanceof Array) structureType = TypedStructure.Array;
-
+		
 		if (c.targetType && c.isMap) {
 			// currently processing property of a Map
 			type = c.targetType;
@@ -234,12 +232,20 @@ export class TransformOperationExecutor {
 			// currently processing property of something other than a Map
 			const metadata = defaultMetadataStorage.findTypeMetadata( c.targetType as Function, propertyName );
 			if (metadata) {
-				const newType = metadata.typeFunction ? metadata.typeFunction(typeHelpOpts) : metadata.reflectedType;
-				if ( metadata.options?.discriminator?.property && metadata.options.discriminator.subTypes ) {
-					type = this.solvePropertyTypeByDiscriminator(c.value, parentDataKey, metadata, type, subValue, newType);
+				const typeHelpOpts: TypeHelpOptions = this.createTypeHelpOptions(targetStructure, c.value, propertyName);
+				const useDiscriminator = metadata?.options?.discriminator?.property && metadata.options.discriminator.subTypes;
+				const processedValue = c.value[parentDataKey];
+				
+				if(useDiscriminator) {
+					if (!(processedValue instanceof Array)) {
+						type = TransformExecutionHelper.findDiscriminatorType(metadata, subValue, typeHelpOpts, this.transformationType)
+					} else {
+						type = metadata;
+					}
 				} else {
-					type = newType;
+					type = metadata.typeFunction ? metadata.typeFunction(typeHelpOpts) : metadata.reflectedType;
 				}
+
 				if(metadata.reflectedType === Map) structureType = TypedStructure.Map
 			} else if (this.options.targetMaps) {
 				// try to find a type in target maps
@@ -258,7 +264,7 @@ export class TransformOperationExecutor {
 		}
 		return { type, structureType };
 	}
-	
+
 	private doTransform_ArrayLike_determineEntryType(targetType: Function | TypeMetadata | undefined, subValue: any, newValue: any[] | Set<any>) {
 		if (typeof targetType === "function") {
 			return targetType;
@@ -267,66 +273,16 @@ export class TransformOperationExecutor {
 		}
 		
 		const metadata = targetType;
-		
-		if(metadata?.options?.discriminator?.property && metadata.options.discriminator.subTypes) {
-			const discr = metadata.options.discriminator;
-			if (this.transformationType === TransformationType.PLAIN_TO_CLASS) {
-				let realTargetType;
-				realTargetType = discr.subTypes.find(
-					(subType) => subType.name === subValue[discr.property]
-				);
-				const options: TypeHelpOptions = this.createTypeHelpOptions(newValue, subValue, undefined);
-				const newType = metadata.typeFunction(options);
-				if (realTargetType === undefined) realTargetType = newType;
-				else realTargetType = realTargetType.value;
+		const typeHelpOpts: TypeHelpOptions = this.createTypeHelpOptions(newValue, subValue, undefined);
+		const useDiscriminator = metadata?.options?.discriminator?.property && metadata.options.discriminator.subTypes;
 
-				if (!metadata.options.keepDiscriminatorProperty) delete subValue[discr.property];
-				return realTargetType;
-			} else if (this.transformationType === TransformationType.CLASS_TO_CLASS) {
-				return subValue.constructor;
-			} else if (this.transformationType === TransformationType.CLASS_TO_PLAIN) {
-				// TODO: this looks like a crude way to process data at the same time
-				const match = discr.subTypes.find(
-					(subType) => subType.value === subValue.constructor
-				);
-				subValue[discr.property] = match?.name;
-				return;
-			}
+		if(useDiscriminator) {
+			return TransformExecutionHelper.findDiscriminatorType(metadata, subValue, typeHelpOpts, this.transformationType)
 		} else {
 			return targetType;
 		}
 	}
 
-	private solvePropertyTypeByDiscriminator(value: any, valueKey: string, metadata: any, type: any, subValue: any, newType: any) {
-		if (!(value[valueKey] instanceof Array)) {
-			const discr = metadata.options.discriminator;
-			if (this.transformationType === TransformationType.PLAIN_TO_CLASS) {
-				type = discr.subTypes.find((subType) => {
-					if (subValue instanceof Object && discr.property in subValue) {
-						return subType.name === subValue[discr.property];
-					}
-				});
-				type === undefined ? (type = newType) : (type = type.value);
-				if (!metadata.options.keepDiscriminatorProperty) {
-					if (subValue instanceof Object && discr.property in subValue) {
-						delete subValue[discr.property];
-					}
-				}
-			}
-			if (this.transformationType === TransformationType.CLASS_TO_CLASS) {
-				type = subValue.constructor;
-			}
-			if (this.transformationType === TransformationType.CLASS_TO_PLAIN) {
-				if (subValue) {
-					const match = discr.subTypes.find((subType) => subType.value === subValue.constructor);
-					subValue[discr.property] = match?.name;
-				}
-			}
-		} else {
-			type = metadata;
-		}
-		return type;
-	}
 
 	private createTypeHelpOptions(newObject: ObjectLikeStructure|Array<any>, propertyValue: Record<string, any>, propertyName: string|undefined): TypeHelpOptions {
 		return {

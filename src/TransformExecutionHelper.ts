@@ -1,5 +1,5 @@
 import { TransformationType } from './enums';
-import { ObjectLikeStructure, TransformOperationArgs, TypeMetadata } from './interfaces';
+import { ObjectLikeStructure, TransformOperationArgs, TypeHelpOptions, TypeMetadata } from './interfaces';
 import { defaultMetadataStorage } from './storage';
 
 /* eslint-disable @typescript-eslint/no-namespace */
@@ -215,6 +215,42 @@ export namespace TransformExecutionHelper {
 			);
 		}
 		return keys;
+	}
+
+	// in original class-transformer, there were separate algorithms for object prop discriminator and array entry discriminator.
+	// based on tests, it seems that merging them both to an unified version works fine.
+	export function findDiscriminatorType(metadata:TypeMetadata, subValue:any, typeHelpOpts: TypeHelpOptions, transformationType:TransformationType) {
+		const discr = metadata.options.discriminator!;
+		const newType = metadata.typeFunction ? metadata.typeFunction(typeHelpOpts) : metadata.reflectedType;
+		if (transformationType === TransformationType.PLAIN_TO_CLASS) {
+			let realTargetType: any = discr.subTypes.find((subType) => {
+				// Note: this additional check was not present for ArrayLike with discriminator. May cause issues
+				if (subValue instanceof Object && discr.property in subValue) {
+					return subType.name === subValue[discr.property];
+				}
+			});
+			if (realTargetType === undefined) realTargetType = newType;
+			else realTargetType = realTargetType.value;
+
+			if (!metadata.options.keepDiscriminatorProperty) {
+				// Note: this additional check was not present for ArrayLike with discriminator. May cause issues
+				if (subValue instanceof Object && discr.property in subValue) {
+					delete subValue[discr.property];
+				}
+			}
+			return realTargetType;
+		}
+		if (transformationType === TransformationType.CLASS_TO_CLASS) {
+			return subValue.constructor;
+		}
+		if (transformationType === TransformationType.CLASS_TO_PLAIN) {
+			if (subValue) {
+				// TODO: this looks like a crude way to process data at the same time
+				const match = discr.subTypes.find((subType) => subType.value === subValue.constructor);
+				subValue[discr.property] = match?.name;
+			}
+			return undefined; // Note: was not present for property diuscriminator solver
+		}
 	}
 
 }

@@ -135,6 +135,7 @@ export class TransformOperationExecutor {
       return value;
     }
   }
+  
   private doTransform_object(
     targetType: Function | TypeMetadata,
     value: any,
@@ -146,7 +147,7 @@ export class TransformOperationExecutor {
       !targetType &&
       value.constructor !==
         Object /* && TransformationType === TransformationType.CLASS_TO_PLAIN*/
-    )
+    ){
       if (!Array.isArray(value) && value.constructor === Array) {
         // Somebody attempts to convert special Array like object to Array, eg:
         // const evilObject = { '100000000': '100000000', __proto__: [] };
@@ -156,6 +157,7 @@ export class TransformOperationExecutor {
         // We are good we can use the built-in constructor
         targetType = value.constructor;
       }
+	}
     if (!targetType && source) targetType = source.constructor;
 
     if (this.options.enableCircularCheck) {
@@ -180,24 +182,7 @@ export class TransformOperationExecutor {
         this.doTransform_object_getTargetProperty(key, targetType);
 
       // get a subvalue
-      let subValue: any = undefined;
-      if (this.transformationType === TransformationType.PLAIN_TO_CLASS) {
-        /**
-         * This section is added for the following report:
-         * https://github.com/typestack/class-transformer/issues/596
-         *
-         * We should not call functions or constructors when transforming to class.
-         */
-        subValue = value[valueKey];
-      } else {
-        if (value instanceof Map) {
-          subValue = value.get(valueKey);
-        } else if (value[valueKey] instanceof Function) {
-          subValue = value[valueKey]();
-        } else {
-          subValue = value[valueKey];
-        }
-      }
+      const subValue = this.doTransform_object_getSubValue(value, valueKey);
 
       // if value is an array try to get its custom array type
       const arrayType = Array.isArray(value[valueKey])
@@ -208,27 +193,14 @@ export class TransformOperationExecutor {
 
       // determine a type
       const { type, isSubValueMap } =
-        this.doTransform_object_determinePropertyType(
-          subValue,
-          targetType,
-          isMap,
-          propertyName,
-          targetStructure,
-          value,
-          valueKey
-        );
+        this.doTransform_object_determinePropertyType( subValue, targetType, isMap, propertyName, targetStructure, value, valueKey );
 
       // if its deserialization then type if required
       // if we uncomment this types like string[] will not work
       // if (this.transformationType === TransformationType.PLAIN_TO_CLASS && !type && subValue instanceof Object && !(subValue instanceof Date))
       //     throw new Error(`Cannot determine type for ${(targetType as any).name }.${propertyName}, did you forget to specify a @Type?`);
 
-      if (
-        this.checkTargetStructureForConflictingProperty(
-          targetStructure,
-          newValueKey
-        )
-      ) {
+      if (this.checkTargetStructureForConflictingProperty( targetStructure, newValueKey )) {
         continue;
       }
 
@@ -237,77 +209,37 @@ export class TransformOperationExecutor {
           this.transformationType === TransformationType.PLAIN_TO_CLASS
             ? newValueKey
             : key;
-        let newPropValue;
-
+			
+			let newPropValue;
         if (this.transformationType === TransformationType.CLASS_TO_PLAIN) {
           // Get original value
           newPropValue = value[transformKey];
           // Apply custom transformation
-          newPropValue = this.applyCustomTransformations(
-            newPropValue,
-            targetType as Function,
-            transformKey,
-            value,
-            this.transformationType
-          );
+          newPropValue = this.applyCustomTransformations( newPropValue, targetType as Function, transformKey, value, this.transformationType );
           // If nothing change, it means no custom transformation was applied, so use the subValue.
-          newPropValue =
-            value[transformKey] === newPropValue ? subValue : newPropValue;
+          newPropValue = value[transformKey] === newPropValue ? subValue : newPropValue;
           // Apply the default transformation
-          newPropValue = this.transform(
-            subSource,
-            newPropValue,
-            type,
-            arrayType,
-            isSubValueMap,
-            level + 1
-          );
+          newPropValue = this.transform( subSource, newPropValue, type, arrayType, isSubValueMap, level + 1 );
         } else {
           if (subValue === undefined && this.options.exposeDefaultValues) {
             // Set default value if nothing provided
-            newPropValue = this.getPropertyFromStructure(
-              targetStructure,
-              newValueKey
-            );
+            newPropValue = this.getPropertyFromStructure( targetStructure, newValueKey );
           } else {
-            newPropValue = this.transform(
-              subSource,
-              subValue,
-              type,
-              arrayType,
-              isSubValueMap,
-              level + 1
-            );
-            newPropValue = this.applyCustomTransformations(
-              newPropValue,
-              targetType as Function,
-              transformKey,
-              value,
-              this.transformationType
-            );
+            newPropValue = this.transform( subSource, subValue, type, arrayType, isSubValueMap, level + 1 );
+            newPropValue = this.applyCustomTransformations( newPropValue, targetType as Function, transformKey, value, this.transformationType );
           }
         }
 
         if (newPropValue !== undefined || this.options.exposeUnsetFields) {
-          this.addPropertyToStructure(
-            targetStructure,
-            newValueKey,
-            newPropValue
-          );
+          this.addPropertyToStructure( targetStructure, newValueKey, newPropValue );
         }
       } else if (
         this.transformationType === TransformationType.CLASS_TO_CLASS
       ) {
-        let finalValue = subValue;
-        finalValue = this.applyCustomTransformations(
-          finalValue,
-          targetType as Function,
-          key,
-          value,
-          this.transformationType
-        );
-        if (finalValue !== undefined || this.options.exposeUnsetFields) {
-          this.addPropertyToStructure(targetStructure, newValueKey, finalValue);
+        let newPropValue = subValue;
+        newPropValue = this.applyCustomTransformations( newPropValue, targetType as Function, key, value, this.transformationType);
+        if (newPropValue !== undefined || this.options.exposeUnsetFields) {
+          this.addPropertyToStructure(targetStructure, newValueKey, newPropValue);
         }
       }
     }
@@ -317,6 +249,29 @@ export class TransformOperationExecutor {
     }
     return targetStructure;
   }
+
+  	// TODO: find out how this subValue is actually being used/useful
+  	private doTransform_object_getSubValue(value: any, valueKey: string) {
+		let subValue: any = undefined;
+		if (this.transformationType === TransformationType.PLAIN_TO_CLASS) {
+			/**
+			 * This section is added for the following report:
+			 * https://github.com/typestack/class-transformer/issues/596
+			 *
+			 * We should not call functions or constructors when transforming to class.
+			 */
+			subValue = value[valueKey];
+		} else {
+			if (value instanceof Map) {
+				subValue = value.get(valueKey);
+			} else if (value[valueKey] instanceof Function) {
+				subValue = value[valueKey]();
+			} else {
+				subValue = value[valueKey];
+			}
+		}
+		return subValue;
+	}
 
   private getPropertyFromStructure(
     targetStructure: Record<string, any> | Map<string, any>,
@@ -382,33 +337,6 @@ export class TransformOperationExecutor {
     } else {
       targetStructure[newValueKey] = newPropValue;
     }
-  }
-
-  // TODO: find out why/how subValues are being used
-  private doTransform_object_extractSubValue(
-    propValue: any,
-    parentObject: Map<any, any> | Object,
-    valueKey: string
-  ) {
-    let subValue: any = undefined;
-    if (this.transformationType === TransformationType.PLAIN_TO_CLASS) {
-      /**
-       * This section is added for the following report:
-       * https://github.com/typestack/class-transformer/issues/596
-       *
-       * We should not call functions or constructors when transforming to class.
-       */
-      subValue = propValue;
-    } else {
-      if (parentObject instanceof Map) {
-        subValue = parentObject.get(valueKey);
-      } else if (propValue instanceof Function) {
-        subValue = propValue();
-      } else {
-        subValue = propValue;
-      }
-    }
-    return subValue;
   }
 
   // TODO: find out what propertyName + newValueKey actually means

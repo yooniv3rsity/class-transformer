@@ -6,4 +6,5 @@ export * from './external-dependencies.interface';
 export * from './metadata';
 export * from './object-like-structure.type';
 export * from './target-map.interface';
+export * from './transform-operation-args.interface';
 export * from './type-help-options.interface';

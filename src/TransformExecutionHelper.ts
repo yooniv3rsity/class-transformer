@@ -1,24 +1,17 @@
 import { TransformationType } from './enums';
-import { ObjectLikeStructure, TypeMetadata } from './interfaces';
+import { ObjectLikeStructure, TransformOperationArgs, TypeMetadata } from './interfaces';
 import { defaultMetadataStorage } from './storage';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace TransformExecutionHelper {
-	export function getReflectedType(
-		target: Function,
-		propertyName: string
-	): Function | undefined {
+	export function getReflectedType( target: Function, propertyName: string ): Function | undefined {
 		if (!target) return undefined;
 		const meta = defaultMetadataStorage.findTypeMetadata(target, propertyName);
 		return meta ? meta.reflectedType : undefined;
 	}
 
-	export function createTargetStructure(
-		source: any,
-		isMap: boolean | undefined,
-		targetType: Function | TypeMetadata | undefined,
-		transformationType: TransformationType,
-	): ObjectLikeStructure {
+	export function createTargetStructure( c:TransformOperationArgs, transformationType: TransformationType ): ObjectLikeStructure {
+		const {source, isMap, targetType} = c;
 		let targetStructure: ObjectLikeStructure = source ? source : {};
 		  
 		if (
@@ -36,11 +29,7 @@ export namespace TransformExecutionHelper {
 		return targetStructure;
 	}
 	
-	export function addPropertyToStructure(
-		targetStructure: ObjectLikeStructure,
-		newValueKey: string,
-		newPropValue: any
-	) {
+	export function addPropertyToStructure( targetStructure: ObjectLikeStructure, newValueKey: string, newPropValue: any) {
 		if (targetStructure instanceof Map) {
 		  targetStructure.set(newValueKey, newPropValue);
 		} else {
@@ -48,10 +37,7 @@ export namespace TransformExecutionHelper {
 		}
 	}
 
-	export function getPropertyFromStructure(
-		targetStructure: ObjectLikeStructure,
-		key: string
-	): any {
+	export function getPropertyFromStructure( targetStructure: ObjectLikeStructure, key: string	): any {
 		if (targetStructure instanceof Map) return targetStructure.get(key);
 		else return targetStructure[key];
 	}
@@ -172,7 +158,6 @@ export namespace TransformExecutionHelper {
 		return [...exposedProperties, ...excludedProperties];
 	}
 
-	
 	export function getTargetKeysBasedOnDecorators(target: Function, keys: any[], transformationType:TransformationType, excludeExtraneousValues:boolean) {
 		let exposedProperties = defaultMetadataStorage.getExposedProperties( target, transformationType);
 		if (transformationType === TransformationType.PLAIN_TO_CLASS) {

@@ -30,14 +30,9 @@ export class ClassTransformer {
         ...options,
       }
     );
-    return executor.transform(
-      undefined,
-      object,
-      undefined,
-      undefined,
-      undefined,
-      undefined
-    );
+	return executor.transform({
+      	value:object
+    });
   }
 
   /**
@@ -68,14 +63,10 @@ export class ClassTransformer {
         ...options,
       }
     );
-    return executor.transform(
-      plainObject as any,
-      object,
-      undefined,
-      undefined,
-      undefined,
-      undefined
-    );
+    return executor.transform({
+      source:plainObject as any,
+      value:object,
+    });
   }
 
   /**
@@ -103,14 +94,10 @@ export class ClassTransformer {
         ...options,
       }
     );
-    return executor.transform(
-      undefined,
-      plain,
-      cls,
-      undefined,
-      undefined,
-      undefined
-    );
+    return executor.transform({
+      value:plain,
+      targetType:cls,
+    });
   }
 
   /**
@@ -140,14 +127,10 @@ export class ClassTransformer {
         ...options,
       }
     );
-    return executor.transform(
-      clsObject as any,
-      plain,
-      undefined,
-      undefined,
-      undefined,
-      undefined
-    );
+    return executor.transform({
+		source:clsObject as any,
+		value:plain,
+	});
   }
 
   /**
@@ -166,14 +149,9 @@ export class ClassTransformer {
         ...options,
       }
     );
-    return executor.transform(
-      undefined,
-      object,
-      undefined,
-      undefined,
-      undefined,
-      undefined
-    );
+    return executor.transform({
+		value:object,
+	});
   }
 
   /**
@@ -204,14 +182,10 @@ classToClassFromExist<T>(
         ...options,
       }
     );
-    return executor.transform(
-      fromObject as any,
-      object,
-      undefined,
-      undefined,
-      undefined,
-      undefined
-    );
+    return executor.transform({
+		source:fromObject as any,
+		value:object,
+	});
   }
 
   /**

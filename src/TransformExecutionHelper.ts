@@ -4,11 +4,6 @@ import { defaultMetadataStorage } from './storage';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace TransformExecutionHelper {
-	export function getReflectedType( target: Function, propertyName: string ): Function | undefined {
-		if (!target) return undefined;
-		const meta = defaultMetadataStorage.findTypeMetadata(target, propertyName);
-		return meta ? meta.reflectedType : undefined;
-	}
 
 	export function createTargetStructure( c:TransformOperationArgs, transformationType: TransformationType ): ObjectLikeStructure {
 		const {source, isMap, targetType} = c;

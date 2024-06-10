@@ -12,7 +12,7 @@ export function Transform(
 ): PropertyDecorator {
   return function (target: any, propertyName: string | Symbol): void {
     defaultMetadataStorage.addTransformMetadata({
-      target: target.constructor,
+      target: target.constructor, 
       propertyName: propertyName as string,
       transformFn,
       options,

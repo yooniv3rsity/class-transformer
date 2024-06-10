@@ -2,16 +2,16 @@
 import { RecursionStack } from './RecursionStack';
 import { TransformExecutionHelper } from './TransformExecutionHelper';
 import { TransformationType, TypedStructure } from "./enums";
-import { ClassTransformOptions, ClassTransformerExternalDependencies, ObjectLikeStructure, TransformOperationArgs, TypeHelpOptions, TypeMetadata } from "./interfaces";
+import { ArrayLikeStructure, ClassTransformOptions, ClassTransformerExternalDependencies, ObjectLikeStructure, TransformOperationArgs, TypeHelpOptions, TypeMetadata } from "./interfaces";
 import { defaultMetadataStorage } from "./storage";
 import { getGlobal, isPromise } from "./utils";
 
 
 interface PropertyTypeInfo {
 	propertyType: Function | undefined;
-	propertyMeta: TypeMetadata | undefined;
 	structureType: TypedStructure | null;
-	arrayType: any;
+	propertyMeta?: TypeMetadata;
+	arrayType?: any;
 }
 
 export class TransformOperationExecutor {
@@ -132,11 +132,11 @@ export class TransformOperationExecutor {
 
 		(c.value as any[]).forEach((subValue, index) => {
 			if (!this.recursionStack.has(subValue)) {
-				const { entryType, structureType } = this.doTransform_ArrayLike_determineEntryType(c.targetType, subValue, newArrayLike);
+				const { propertyType, structureType } = this.doTransform_ArrayLike_determineEntryType(c, subValue, newArrayLike);
 				const transformedSubValue = this.transform({
 					source: c.source ? c.source[index] : undefined,
 					value: subValue,
-					targetType: entryType,
+					targetType: propertyType,
 					isMap: structureType === TypedStructure.Map,
 					level: c.level! + 1
 				});
@@ -278,12 +278,11 @@ export class TransformOperationExecutor {
 
 		// TODO: this seems unrealiable. we should not set expected structure type based on the incoming value.
 		const propValueContainsArray = Array.isArray(c.value[parentDataKey]);
-		const propValueContainsMap = subValue instanceof Map;
 			
 		// TODO: this seems unrealiable. we should not set expected structure type based on the incoming value.
 		// possibly this makes nested maps work, because if c.isMap is true, stuff will be skipped
 		// interestingly, no tests fail when commenting this out.
-		// if(subValue instanceof Map) structureType = TypedStructure.Map;
+		if(subValue instanceof Map) structureType = TypedStructure.Map;
 		
 		if (c.targetType) {
 			const metadata = defaultMetadataStorage.findTypeMetadata( c.targetType, propertyName );
@@ -341,29 +340,33 @@ export class TransformOperationExecutor {
 		return { propertyType, propertyMeta, structureType, arrayType };
 	}
 
-	private doTransform_ArrayLike_determineEntryType(targetType: Function | TypeMetadata | undefined, subValue: any, newValue: any[] | Set<any>) {
-		let entryType: any = undefined;
+	private doTransform_ArrayLike_determineEntryType(
+		c: TransformOperationArgs,
+		subValue: any, 
+		targetStructure: ArrayLikeStructure
+	):PropertyTypeInfo {
+		let propertyType: any = undefined;
 		let structureType: TypedStructure|null = null;
 		if(subValue instanceof Map) structureType = TypedStructure.Map;
 
 		// TODO: how can targetType ever be TypeMetadata?
-		if (typeof targetType === "function") {
-			entryType = targetType;
-		} else if(targetType) {
+		if (typeof c.targetType === "function") {
+			propertyType = c.targetType;
+		} else if(c.targetType) {
 			// console.warn(targetType)
 			// throw new Error('Unexpected: can this even happen?')
-			const metadata = targetType;
-			const typeHelpOpts: TypeHelpOptions = this.createTypeHelpOptions(newValue, subValue, undefined);
+			const metadata = c.targetType as TypeMetadata;
+			const typeHelpOpts: TypeHelpOptions = this.createTypeHelpOptions(targetStructure, subValue, undefined);
 			const useDiscriminator = metadata.options?.discriminator?.property && metadata.options.discriminator.subTypes;
 	
 			if(useDiscriminator) {
-				entryType = TransformExecutionHelper.findDiscriminatorType(metadata, subValue, typeHelpOpts, this.transformationType)
+				propertyType = TransformExecutionHelper.findDiscriminatorType(metadata, subValue, typeHelpOpts, this.transformationType)
 			} else {
-				entryType = targetType;
+				propertyType = c.targetType;
 			}
 		}
 
-		return { entryType, structureType };
+		return { propertyType, structureType };
 		
 	}
 

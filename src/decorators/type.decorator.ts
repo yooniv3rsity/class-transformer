@@ -31,7 +31,7 @@ export function Type(
  * like @Type but with explicitly configurated Structure type.
  * Allows to get rid of Reflection to determine if the property contains a child object or a Map/Array/Set.
  */
-export function TypedStructure(
+export function Structure(
 	structureType: ClassConstructor<Map<any,any>>|ClassConstructor<Array<any>>|ClassConstructor<Set<any>>,
 	typeFunction: (type?: TypeHelpOptions) => Function,
 	options: TypeOptions = {}

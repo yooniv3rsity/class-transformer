@@ -16,11 +16,11 @@ This fork adds custom functionality to class transformer.
 ### 1.0
 
 - Restructure code and fix many lint and possibly edge case runtime errors
+- [Structure Decorator](#structure-decorator) - like @Type() but with greater control and stricter transformation
 
 ### 0.7
 - [Exposing/Excluding properties of subobjects](#exposingexcluding-properties-of-subobjects)
 - export TransformOperationExecutor
-- <s>add an extra argument "dependencies", which will be passed to: (0.6.0)</s>
 - add an extra options property "dependencies", which will be passed to: (0.7.0)
   - custom transform functions
   - custom type factory function
@@ -58,6 +58,7 @@ This tool is super useful on both frontend and backend.
 * [Enforcing type-safe instance⬆](#enforcing-type-safe-instance)
 * [Working with nested objects⬆](#working-with-nested-objects)
 	* [Providing more than one type option⬆](#providing-more-than-one-type-option)
+	* [Structure Decorator](#structure-decorator)
 * [Exposing getters and method return values⬆](#exposing-getters-and-method-return-values)
 * [Exposing properties with different names⬆](#exposing-properties-with-different-names)
 * [Skipping specific properties⬆](#skipping-specific-properties)
@@ -472,6 +473,44 @@ let album = plainToInstance(Album, albumJson);
 
 Hint: The same applies for arrays with different sub types. Moreover you can specify `keepDiscriminatorProperty: true`
 in the options to keep the discriminator property also inside your resulting class.
+
+### Structure Decorator
+
+The `@Structure(...)` decorator is an enhanced version of @Type.
+In some situations, @Type will rather  _guess_ what the subobject structure should look like - is it a single object, an array, a map?
+Without ts type reflection enabled, it can result in unexpected, even dangerous data being returned.
+
+@Structure provides a more solid implementation.
+It receives an explicit structure type argument at first index.
+Regularly it will be Map, Array or Set. But you can also pass a child class of any of these if required.
+
+Having knowledge of the expected structure type allows class-transformer to not guess it from the value.
+This ensures the value will always be of the correct type, even when the plain value is messed up or invalid.
+
+```ts
+import { Structure, plainToInstance } from 'class-transformer';
+
+export class Album {
+  id: number;
+
+  name: string;
+
+  @Structure(Array, () => Photo)
+  photos: Photo[];
+
+  @Structure(Set, () => Camera)
+  photos: Set<Camera>;
+
+  @Structure(Map, () => Location)
+  photos: Map<string, Location>;
+
+  // if you want to, @Structure also works with primitive Type, example:
+  @Structure(Map, () => Number)
+  priceList: Map<string, Number>;
+}
+
+```
+
 
 ## Exposing getters and method return values[⬆](#table-of-contents)
 

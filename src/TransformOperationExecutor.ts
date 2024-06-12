@@ -349,7 +349,7 @@ export class TransformOperationExecutor {
 			if(metadata.reflectedType === Map) structureTypeGroup = StructureTypeGroup.Map
 
 			if(metadata.structureType) {
-				// metadata is from @TypedStructure(StructType, ()=>PropType) so we know user wants to create a <structureType> containing <propertyType> items
+				// metadata is from @Structure(StructType, ()=>PropType) so we know user wants to create a <structureType> containing <propertyType> items
 				structureTypeGroup = TransformExecutionHelper.getStructureTypeGroup(metadata.structureType);
 				structureType = metadata.structureType;
 			} else if(propertyType) {

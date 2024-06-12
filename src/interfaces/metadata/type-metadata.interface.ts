@@ -17,7 +17,7 @@ export interface TypeMetadata extends BaseMetadata {
   reflectedType: any;
 
   /**
-   * type of structure, set by TypedStructure() decorator.
+   * type of structure, set by Structure() decorator.
    * Explicit configuration to not rely on reflectedType or input value type any longer.
    */
   structureType?: ClassConstructor<any>;

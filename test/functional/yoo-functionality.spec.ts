@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { Exclude, Expose, Type, TypedStructure } from '../../src/decorators';
+import { Exclude, Expose, Type, Structure } from '../../src/decorators';
 import {
 	classToPlainFromExist,
 	instanceToInstance,
@@ -114,7 +114,7 @@ describe('functionality implemented by YOOniversity', () => {
 		});
 	});
 
-	describe('@TypedStructure', () => {
+	describe('@Structure', () => {
 		it('Array should work - with object', () => {
 
 			class UserData {
@@ -126,7 +126,7 @@ describe('functionality implemented by YOOniversity', () => {
 				name: string;
 				
 				@Expose()
-				@TypedStructure(Array,()=>UserData)
+				@Structure(Array,()=>UserData)
 				data: UserData[];
 			}
 
@@ -207,7 +207,7 @@ describe('functionality implemented by YOOniversity', () => {
 				name: string;
 				
 				@Expose()
-				@TypedStructure(Array,()=>String)
+				@Structure(Array,()=>String)
 				data: string[];
 			}
 
@@ -293,7 +293,7 @@ describe('functionality implemented by YOOniversity', () => {
 				name: string;
 				
 				@Expose()
-				@TypedStructure(Set,()=>UserData)
+				@Structure(Set,()=>UserData)
 				data: Set<UserData>;
 			}
 
@@ -366,7 +366,7 @@ describe('functionality implemented by YOOniversity', () => {
 				name: string;
 				
 				@Expose()
-				@TypedStructure(Set,()=>String)
+				@Structure(Set,()=>String)
 				data: Set<string>;
 			}
 
@@ -449,7 +449,7 @@ describe('functionality implemented by YOOniversity', () => {
 				name: string;
 				
 				@Expose()
-				@TypedStructure(Map,()=>UserData)
+				@Structure(Map,()=>UserData)
 				data: Map<string,UserData>;
 			}
 
@@ -525,7 +525,7 @@ describe('functionality implemented by YOOniversity', () => {
 				name: string;
 				
 				@Expose()
-				@TypedStructure(Map,()=>String)
+				@Structure(Map,()=>String)
 				data: Map<string,string>;
 			}
 

@@ -19,6 +19,8 @@ export namespace TransformExecutionHelper {
 			return Map;
 		} else if(structureTypeGroup === StructureTypeGroup.Set) {
 			return Set;
+		} else if(structureTypeGroup === StructureTypeGroup.Object) {
+			return Object;
 		} else if(structureTypeGroup === StructureTypeGroup.Array) {
 			// if value is an array try to get its custom array type
 			// Note: In case of arrays, a custom prop named structureType will be passed in TransformOperationArgs.
@@ -28,14 +30,19 @@ export namespace TransformExecutionHelper {
 		return null;
 	}
 
+	export function getStructureTypeGroup(structureType:ClassConstructor<any>):StructureTypeGroup|null {
+		if(structureType === Array || structureType.prototype instanceof Array) return StructureTypeGroup.Array
+		if(structureType === Set || structureType.prototype instanceof Set) return StructureTypeGroup.Set
+		if(structureType === Map || structureType.prototype instanceof Map) return StructureTypeGroup.Map
+		if(structureType === Object || structureType.prototype instanceof Object) return StructureTypeGroup.Object
+		return null;
+	}
+
 	export function createTargetStructure( c:TransformOperationArgs, transformationType: TransformationType ): ObjectLikeStructure {
 		const {source, isMap, targetType} = c;
 		let targetStructure: ObjectLikeStructure = source ? source : {};
 		  
-		if (
-		  !source &&
-		  transformationType !== TransformationType.CLASS_TO_PLAIN
-		) {
+		if ( !source && transformationType !== TransformationType.CLASS_TO_PLAIN) {
 			if (isMap) {
 				targetStructure = new Map();
 			} else if (targetType) {

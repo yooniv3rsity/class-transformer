@@ -2,7 +2,7 @@
 import { RecursionStack } from './RecursionStack';
 import { TransformExecutionHelper } from './TransformExecutionHelper';
 import { TransformationType, StructureTypeGroup } from "./enums";
-import { ArrayLikeStructure, ClassTransformOptions, ClassTransformerExternalDependencies, ObjectLikeStructure, TransformOperationArgs, TypeHelpOptions, TypeMetadata } from "./interfaces";
+import { ArrayLikeStructure, ClassConstructor, ClassTransformOptions, ClassTransformerExternalDependencies, ObjectLikeStructure, TransformOperationArgs, TypeHelpOptions, TypeMetadata } from "./interfaces";
 import { defaultMetadataStorage } from "./storage";
 import { getGlobal, isPromise } from "./utils";
 
@@ -37,8 +37,19 @@ export class TransformOperationExecutor {
 	// Public Methods
 	// -------------------------------------------------------------------------
 	
+	// user executed transformation starts here
 	transform(c:TransformOperationArgs): any {
 		if(!c.level) c.level = 0;
+		c.structureType = (c.targetType || c.source?.constructor || undefined) as any;
+		if (this.options.transformationHandler) {
+			return this.options.transformationHandler( c, this );
+		} else {
+			return this.doTransform(c);
+		}
+	}
+
+	// recursive/nested transformation uses separate method
+	nestedTransform(c:TransformOperationArgs): any {
 		if (this.options.transformationHandler) {
 			return this.options.transformationHandler( c, this );
 		} else {
@@ -54,11 +65,11 @@ export class TransformOperationExecutor {
 		} else if (!isMap && (targetType === String || targetType === Number || targetType === Boolean || targetType === BigInt)) {
 			return targetType(value);
 		} else if (Array.isArray(value) || value instanceof Set) {
-			return this.doTransform_ArrayLike( c );
+			return this.doTransform_structure(c)
 		} else if (isPromise(value) && !isMap) {
 			return new Promise((resolve, reject) => {
 				value.then((data: any) =>
-					resolve(this.transform({
+					resolve(this.nestedTransform({
 						value:data,
 						targetType,
 						level: c.level! + 1
@@ -72,6 +83,17 @@ export class TransformOperationExecutor {
 		} else if (!!getGlobal().Buffer && (targetType === Buffer || value instanceof Buffer) && !isMap ) {
 			return Buffer.from(value);
 		} else if (typeof value === "object") {
+			return this.doTransform_structure(c)
+		}  else {
+			return value;
+		}
+	}
+
+	private doTransform_structure(c:TransformOperationArgs): any {
+		const { value, isMap} = c;
+		if (Array.isArray(value) || value instanceof Set) {
+			return this.doTransform_ArrayLike( c );
+		} else if (typeof value === "object") {
 			if ( !isMap && typeof value.then === "function" ) {
 				// Note: Never happens because promises have already been handled above.
 				// This option simply returns the Promise preventing a JS error from happening and should be an inaccessible path.
@@ -83,12 +105,13 @@ export class TransformOperationExecutor {
 		}
 	}
 
-	// called when transforming Object or Map
+	// called on incoming VALUE being Object or Map
 	private doTransform_objectLike(c:TransformOperationArgs): any {
 		c = this.doTransform_object_normalizeTargetType(c);
 		
 		this.recursionStack.add(c.value);
-		
+		c.value = this.ensureCorrectValueType(c.value, c.structureType);
+
 		// @yoolabs/class-transformer modification: Pass level int to getKeys
 		const keys = this.getKeys(c);
 		const targetStructure = TransformExecutionHelper.createTargetStructure(c, this.transformationType);
@@ -112,8 +135,8 @@ export class TransformOperationExecutor {
 		for (const incomingValueDataKey of keys) {
 			if (incomingValueDataKey === "__proto__" || incomingValueDataKey === "constructor") continue;
 			
-			const subValue = getSubValueFromStructure(c.value, incomingValueDataKey, this.transformationType);
-			
+			let subValue = getSubValueFromStructure(c.value, incomingValueDataKey, this.transformationType);
+
 			// if its deserialization then type if required
 			// if we uncomment this types like string[] will not work
 			// if (this.transformationType === TransformationType.PLAIN_TO_CLASS && !type && subValue instanceof Object && !(subValue instanceof Date))
@@ -121,6 +144,7 @@ export class TransformOperationExecutor {
 			
 			const { propertyName, newValueKey } = TransformExecutionHelper.getTargetPropertyKeyName(incomingValueDataKey, c.targetType, this.options.ignoreDecorators || false, this.transformationType);
 			const propertyTypeInfo:PropertyTypeInfo = this.doTransform_object_determinePropertyType(c, subValue, propertyName, targetStructure);
+			if(propertyTypeInfo.structureType && !c.isMap) subValue = this.ensureCorrectValueType(subValue, propertyTypeInfo.structureType);
 
 			if (TransformExecutionHelper.checkTargetStructureForConflictingProperty( targetStructure, newValueKey, this.transformationType )) {
 				continue;
@@ -141,14 +165,17 @@ export class TransformOperationExecutor {
 		return targetStructure;
 	}
 
-	// Called when transforming Array or Set
+	// called on incoming VALUE being Array or Set
 	private doTransform_ArrayLike(c:TransformOperationArgs): any {
 		const newArrayLike = TransformExecutionHelper.createArrayLike(c,this.transformationType);
 
-		(c.value as any[]).forEach((subValue, index) => {
+		const arrayValue = this.ensureCorrectValueType(c.value, c.structureType);
+		// console.log('transform array -- type info??', c.structureType, c.targetType, c.typeMetadata);
+		(arrayValue as any[]).forEach((subValue, index) => {
+			subValue = this.ensureCorrectValueType(subValue, c.targetType as any);
 			if (!this.recursionStack.has(subValue)) {
 				const { propertyType, structureTypeGroup } = this.doTransform_ArrayLike_determineEntryType(c, subValue, newArrayLike);
-				const transformedSubValue = this.transform({
+				const transformedSubValue = this.nestedTransform({
 					source: c.source ? c.source[index] : undefined,
 					value: subValue,
 					targetType: propertyType,
@@ -185,7 +212,7 @@ export class TransformOperationExecutor {
 			// Set default value if nothing provided
 			newPropValue = TransformExecutionHelper.getPropertyFromStructure(targetStructure, newValueKey);
 		} else {
-			newPropValue = this.transform({
+			newPropValue = this.nestedTransform({
 				source: c.source ? c.source[incomingValueDataKey] : undefined,
 				value: subValue,
 				targetType: propType.propertyMeta || propType.propertyType as any,
@@ -214,7 +241,7 @@ export class TransformOperationExecutor {
 		// failing tests seem to have to do with getter functions 
 		newPropValue = c.value[transformKey] === newPropValue ? subValue : newPropValue;
 
-		newPropValue = this.transform({
+		newPropValue = this.nestedTransform({
 			source: c.source ? c.source[incomingValueDataKey] : undefined,
 			value: newPropValue,
 			targetType: propType.propertyMeta || propType.propertyType as any,
@@ -248,6 +275,25 @@ export class TransformOperationExecutor {
 		};
 	}
 
+	private ensureCorrectValueType(value:any, structureType: ClassConstructor<any>|undefined):any {
+		// if(!structureType) console.log('ensureCorrectValueType - no structureType given.',structureType, value)
+		if(!structureType) return value;
+
+		const typeGroup = TransformExecutionHelper.getStructureTypeGroup(structureType);
+
+		if(typeGroup === StructureTypeGroup.Array ||typeGroup === StructureTypeGroup.Set) {
+			const validSourceValue = !value || Array.isArray(value) || (value instanceof Set);
+			// console.log('ensureCorrectValueType ArrayLike', value, 'valid?', validSourceValue)
+			if(!validSourceValue) return []
+		} else if(typeGroup === StructureTypeGroup.Map ||typeGroup === StructureTypeGroup.Object) {
+			const validSourceValue = !value || (value instanceof Map) || (typeof value === 'object');
+			// console.log('ensureCorrectValueType ObjectLike', value, 'valid?', validSourceValue)
+			if(!validSourceValue) return {}
+		}
+
+		return value;
+	}
+
 	// determine the targetType for a property + if the type is nested within a structure like Array/Map
 	// c.targetType may be set, it can contain the type defined for the parent object.
 	// only this method fetches Type Metadata and extracts the property type from it.
@@ -264,9 +310,10 @@ export class TransformOperationExecutor {
 			return { propertyType:undefined, propertyMeta:undefined, structureTypeGroup:null, structureType:undefined };
 		}
 
-		const metadata = defaultMetadataStorage.findTypeMetadata( c.targetType, targetTypePropertyName );			
+		const metadata:TypeMetadata = defaultMetadataStorage.findTypeMetadata( c.targetType, targetTypePropertyName );			
 		let structureTypeGroup = TransformExecutionHelper.determinestructureTypeGroup(subValue, metadata)
-		const structureType = TransformExecutionHelper.getStructureType(structureTypeGroup, metadata)
+		// must not default to c.structureType, this is the type of PARENT object!
+		let structureType = TransformExecutionHelper.getStructureType(structureTypeGroup, metadata)
 		let propertyType: Function|undefined = undefined;
 		let propertyMeta: TypeMetadata|undefined = undefined;
 
@@ -277,6 +324,7 @@ export class TransformOperationExecutor {
 		} 
 
 		if (metadata) {
+			// console.log('>>>>>> metadata for '+targetTypePropertyName,metadata)
 			const typeHelpOpts: TypeHelpOptions = this.createTypeHelpOptions(targetStructure, c.value, targetTypePropertyName);
 			const useDiscriminator = metadata?.options?.discriminator?.property && metadata.options.discriminator.subTypes;
 			
@@ -296,20 +344,37 @@ export class TransformOperationExecutor {
 			// set structureTypeGroup by Reflected or explicit Decorator
 			if(metadata.reflectedType === Map) structureTypeGroup = StructureTypeGroup.Map
 
+			if(metadata.structureType) {
+				structureTypeGroup = TransformExecutionHelper.getStructureTypeGroup(metadata.structureType);
+				structureType = metadata.structureType;
+			} else if(propertyType) {
+				// when user decorates a prop with @Type(()=>Set), the type is not actually referring to the property, but is a strcture with untyped content.
+				const propertyTypeAsStructureType = TransformExecutionHelper.getStructureTypeGroup(propertyType as any)
+				if(propertyTypeAsStructureType && propertyTypeAsStructureType !== StructureTypeGroup.Object) {
+					structureType = propertyType as any;
+					propertyType = undefined;
+				}
+			}
+
 		} else if (this.options.targetMaps) {
+
 			this.options.targetMaps.filter(
 				(map) => map.target === c.targetType && !!map.properties[targetTypePropertyName]
 			).forEach((map) => {
 				// TODO: huh? why re-assign type x times in a loop?
 				propertyType = map.properties[targetTypePropertyName];
 			});
+
 		} else if ( this.options.enableImplicitConversion && this.transformationType === TransformationType.PLAIN_TO_CLASS ) {
+
 			// if we have no registererd type via the @Type() decorator then we check if we have any
 			// type declarations in reflect-metadata (type declaration is emited only if some decorator is added to the property.)
 			const reflectedType = (Reflect as any).getMetadata( "design:type", c.targetType.prototype, targetTypePropertyName );
 			if (reflectedType) propertyType = reflectedType;
+
 		}
 				
+		// console.log('Type info for prop '+targetTypePropertyName+':', { propertyType, propertyMeta, structureTypeGroup, structureType })
 		return { propertyType, propertyMeta, structureTypeGroup, structureType };
 	}
 

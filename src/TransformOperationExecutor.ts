@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { RecursionStack } from './RecursionStack';
 import { TransformExecutionHelper } from './TransformExecutionHelper';
-import { TransformationType, TypedStructure } from "./enums";
+import { TransformationType, StructureTypeGroup } from "./enums";
 import { ArrayLikeStructure, ClassTransformOptions, ClassTransformerExternalDependencies, ObjectLikeStructure, TransformOperationArgs, TypeHelpOptions, TypeMetadata } from "./interfaces";
 import { defaultMetadataStorage } from "./storage";
 import { getGlobal, isPromise } from "./utils";
@@ -9,9 +9,9 @@ import { getGlobal, isPromise } from "./utils";
 
 interface PropertyTypeInfo {
 	propertyType: Function | undefined;
-	structureType: TypedStructure | null;
+	structureTypeGroup: StructureTypeGroup | null;
 	propertyMeta?: TypeMetadata;
-	arrayType?: any;
+	structureType?: any;
 }
 
 export class TransformOperationExecutor {
@@ -92,12 +92,27 @@ export class TransformOperationExecutor {
 		// @yoolabs/class-transformer modification: Pass level int to getKeys
 		const keys = this.getKeys(c);
 		const targetStructure = TransformExecutionHelper.createTargetStructure(c, this.transformationType);
+
+		// returns a structure's property value or its return value in case it is a function
+		const getSubValueFromStructure = (structure: ObjectLikeStructure, propKey: string, transformationType:TransformationType) => {
+			let subValue: any = undefined;
+			if (transformationType === TransformationType.PLAIN_TO_CLASS) {
+				// no calling of constructor/function in plain to class!
+				// see https://github.com/typestack/class-transformer/issues/596
+				subValue = structure[propKey];
+			} else {
+				subValue = TransformExecutionHelper.getPropertyFromStructure(structure, propKey)
+				// execute function bound to object! -> value[valueKey]()
+				if (subValue instanceof Function) subValue = structure[propKey]();
+			}
+			return subValue;
+		}
 		
 		// traverse over keys
 		for (const incomingValueDataKey of keys) {
 			if (incomingValueDataKey === "__proto__" || incomingValueDataKey === "constructor") continue;
 			
-			const subValue = this.doTransform_object_getSubValue(c.value, incomingValueDataKey);
+			const subValue = getSubValueFromStructure(c.value, incomingValueDataKey, this.transformationType);
 			
 			// if its deserialization then type if required
 			// if we uncomment this types like string[] will not work
@@ -105,7 +120,7 @@ export class TransformOperationExecutor {
 			//     throw new Error(`Cannot determine type for ${(targetType as any).name }.${propertyName}, did you forget to specify a @Type?`);
 			
 			const { propertyName, newValueKey } = TransformExecutionHelper.getTargetPropertyKeyName(incomingValueDataKey, c.targetType, this.options.ignoreDecorators || false, this.transformationType);
-			const propertyTypeInfo:PropertyTypeInfo = this.doTransform_object_determinePropertyType(c, subValue, propertyName, incomingValueDataKey, targetStructure);
+			const propertyTypeInfo:PropertyTypeInfo = this.doTransform_object_determinePropertyType(c, subValue, propertyName, targetStructure);
 
 			if (TransformExecutionHelper.checkTargetStructureForConflictingProperty( targetStructure, newValueKey, this.transformationType )) {
 				continue;
@@ -132,12 +147,12 @@ export class TransformOperationExecutor {
 
 		(c.value as any[]).forEach((subValue, index) => {
 			if (!this.recursionStack.has(subValue)) {
-				const { propertyType, structureType } = this.doTransform_ArrayLike_determineEntryType(c, subValue, newArrayLike);
+				const { propertyType, structureTypeGroup } = this.doTransform_ArrayLike_determineEntryType(c, subValue, newArrayLike);
 				const transformedSubValue = this.transform({
 					source: c.source ? c.source[index] : undefined,
 					value: subValue,
 					targetType: propertyType,
-					isMap: structureType === TypedStructure.Map,
+					isMap: structureTypeGroup === StructureTypeGroup.Map,
 					level: c.level! + 1
 				});
 				TransformExecutionHelper.addPropertyToArrayLike(newArrayLike, transformedSubValue)
@@ -164,8 +179,6 @@ export class TransformOperationExecutor {
 		targetStructure: ObjectLikeStructure, propType:PropertyTypeInfo, newValueKey:string
 	) {
 		let newPropValue:any;
-		const { propertyMeta, propertyType, structureType, arrayType } = propType;
-
 		const transformKey = this.transformationType === TransformationType.PLAIN_TO_CLASS ? newValueKey : incomingValueDataKey;
 
 		if (subValue === undefined && this.options.exposeDefaultValues) {
@@ -175,9 +188,9 @@ export class TransformOperationExecutor {
 			newPropValue = this.transform({
 				source: c.source ? c.source[incomingValueDataKey] : undefined,
 				value: subValue,
-				targetType: propertyMeta || propertyType as any,
-				arrayType: arrayType,
-				isMap: structureType === TypedStructure.Map,
+				targetType: propType.propertyMeta || propType.propertyType as any,
+				structureType: propType.structureType,
+				isMap: propType.structureTypeGroup === StructureTypeGroup.Map,
 				level: c.level! + 1
 			});
 			newPropValue = this.applyCustomTransformations(newPropValue, c.targetType as Function, transformKey, c.value, this.transformationType);
@@ -193,7 +206,6 @@ export class TransformOperationExecutor {
 		targetStructure: ObjectLikeStructure, propType:PropertyTypeInfo, newValueKey:string
 	) {
 		let newPropValue:any;
-		const { propertyMeta, propertyType, structureType, arrayType } = propType;
 		const transformKey = incomingValueDataKey;
 
 		newPropValue = this.applyCustomTransformations(c.value[transformKey], c.targetType as Function, transformKey, c.value, this.transformationType);
@@ -205,9 +217,9 @@ export class TransformOperationExecutor {
 		newPropValue = this.transform({
 			source: c.source ? c.source[incomingValueDataKey] : undefined,
 			value: newPropValue,
-			targetType: propertyMeta || propertyType as any,
-			arrayType: arrayType,
-			isMap: structureType === TypedStructure.Map,
+			targetType: propType.propertyMeta || propType.propertyType as any,
+			structureType: propType.structureType,
+			isMap: propType.structureTypeGroup === StructureTypeGroup.Map,
 			level: c.level! + 1
 		});
 
@@ -236,29 +248,6 @@ export class TransformOperationExecutor {
 		};
 	}
 
-	// TODO: find out how this subValue is actually being used/useful
-	private doTransform_object_getSubValue(value: any, valueKey: string) {
-		let subValue: any = undefined;
-		if (this.transformationType === TransformationType.PLAIN_TO_CLASS) {
-			/**
-			* This section is added for the following report:
-			* https://github.com/typestack/class-transformer/issues/596
-			*
-			* We should not call functions or constructors when transforming to class.
-			*/
-			subValue = value[valueKey];
-		} else {
-			if (value instanceof Map) {
-				subValue = value.get(valueKey);
-			} else if (value[valueKey] instanceof Function) {
-				subValue = value[valueKey]();
-			} else {
-				subValue = value[valueKey];
-			}
-		}
-		return subValue;
-	}
-
 	// determine the targetType for a property + if the type is nested within a structure like Array/Map
 	// c.targetType may be set, it can contain the type defined for the parent object.
 	// only this method fetches Type Metadata and extracts the property type from it.
@@ -267,77 +256,61 @@ export class TransformOperationExecutor {
 	private doTransform_object_determinePropertyType(
 		c: TransformOperationArgs,
 		subValue: any,
-		propertyName: string,
-		parentDataKey: string,
+		targetTypePropertyName: string,
 		targetStructure: ObjectLikeStructure,
 	): PropertyTypeInfo {
+		
+		if (!c.targetType) {
+			return { propertyType:undefined, propertyMeta:undefined, structureTypeGroup:null, structureType:undefined };
+		}
+
+		const metadata = defaultMetadataStorage.findTypeMetadata( c.targetType, targetTypePropertyName );			
+		let structureTypeGroup = TransformExecutionHelper.determinestructureTypeGroup(subValue, metadata)
+		const structureType = TransformExecutionHelper.getStructureType(structureTypeGroup, metadata)
 		let propertyType: Function|undefined = undefined;
 		let propertyMeta: TypeMetadata|undefined = undefined;
-		let structureType: TypedStructure|null = null;
-		let arrayType:any = undefined;
 
-		// TODO: this seems unrealiable. we should not set expected structure type based on the incoming value.
-		const propValueContainsArray = Array.isArray(c.value[parentDataKey]);
+		if(c.isMap) {
+			// currently processing property of a Map.
+			// Note: isMap is not calculated for root level, however root can never be a map or array, so no worries here.
+			propertyType = c.targetType;
+		} 
+
+		if (metadata) {
+			const typeHelpOpts: TypeHelpOptions = this.createTypeHelpOptions(targetStructure, c.value, targetTypePropertyName);
+			const useDiscriminator = metadata?.options?.discriminator?.property && metadata.options.discriminator.subTypes;
 			
-		// TODO: this seems unrealiable. we should not set expected structure type based on the incoming value.
-		// possibly this makes nested maps work, because if c.isMap is true, stuff will be skipped
-		// interestingly, no tests fail when commenting this out.
-		if(subValue instanceof Map) structureType = TypedStructure.Map;
-		
-		if (c.targetType) {
-			const metadata = defaultMetadataStorage.findTypeMetadata( c.targetType, propertyName );
-			if(propValueContainsArray) {
-				// if value is an array try to get its custom array type
-				// Note: In case of arrays, a custom prop named arrayType will be passed in TransformOperationArgs.
-				// it contains the reflected type as stored in type Metadata object.
-				if(metadata?.reflectedType) arrayType = metadata.reflectedType;
-			}
-			if(c.isMap) {
-				// currently processing property of a Map.
-				// Note: isMap is not calculated for root level, however root can never be a map or array, so no worries here.
-				propertyType = c.targetType;
-			} else {
-				// currently processing property of something other than a Map
-				if (metadata) {
-					const typeHelpOpts: TypeHelpOptions = this.createTypeHelpOptions(targetStructure, c.value, propertyName);
-					const useDiscriminator = metadata?.options?.discriminator?.property && metadata.options.discriminator.subTypes;
-					const processedValue = c.value[parentDataKey];
-					
-					if(useDiscriminator) {
-						if (!(processedValue instanceof Array)) {
-							propertyType = TransformExecutionHelper.findDiscriminatorType(metadata, subValue, typeHelpOpts, this.transformationType)
-						} else {
-							propertyMeta = metadata;
-						}
-					} else if(metadata.typeFunction) {
-						propertyType = metadata.typeFunction(typeHelpOpts);
-					} else {
-						// TODO: is this smart? we dont want type to be Map, Array or anything alike.
-						propertyType = metadata.reflectedType
-					}
-
-					// set structureType by Reflected or explicit Decorator
-					if(metadata.reflectedType === Map) {
-						structureType = TypedStructure.Map
-					}
-
-				} else if (this.options.targetMaps) {
-					// try to find a type in target maps
-					this.options.targetMaps.filter(
-						(map) => map.target === c.targetType && !!map.properties[propertyName]
-					).forEach((map) => {
-						// TODO: huh? why re-assign type x times in a loop?
-						propertyType = map.properties[propertyName];
-					});
-				} else if ( this.options.enableImplicitConversion && this.transformationType === TransformationType.PLAIN_TO_CLASS ) {
-					// if we have no registererd type via the @Type() decorator then we check if we have any
-					// type declarations in reflect-metadata (type declaration is emited only if some decorator is added to the property.)
-					const reflectedType = (Reflect as any).getMetadata( "design:type", c.targetType.prototype, propertyName );
-					if (reflectedType) propertyType = reflectedType;
+			if(useDiscriminator) {
+				if (structureTypeGroup !== StructureTypeGroup.Array) {
+					propertyType = TransformExecutionHelper.findDiscriminatorType(metadata, subValue, typeHelpOpts, this.transformationType)
+				} else {
+					propertyMeta = metadata;
 				}
+			} else if(metadata.typeFunction) {
+				propertyType = metadata.typeFunction(typeHelpOpts);
+			} else {
+				// TODO: is this smart? we dont want type to be Map, Array or anything alike.
+				propertyType = metadata.reflectedType
 			}
+
+			// set structureTypeGroup by Reflected or explicit Decorator
+			if(metadata.reflectedType === Map) structureTypeGroup = StructureTypeGroup.Map
+
+		} else if (this.options.targetMaps) {
+			this.options.targetMaps.filter(
+				(map) => map.target === c.targetType && !!map.properties[targetTypePropertyName]
+			).forEach((map) => {
+				// TODO: huh? why re-assign type x times in a loop?
+				propertyType = map.properties[targetTypePropertyName];
+			});
+		} else if ( this.options.enableImplicitConversion && this.transformationType === TransformationType.PLAIN_TO_CLASS ) {
+			// if we have no registererd type via the @Type() decorator then we check if we have any
+			// type declarations in reflect-metadata (type declaration is emited only if some decorator is added to the property.)
+			const reflectedType = (Reflect as any).getMetadata( "design:type", c.targetType.prototype, targetTypePropertyName );
+			if (reflectedType) propertyType = reflectedType;
 		}
-		return { propertyType, propertyMeta, structureType, arrayType };
+				
+		return { propertyType, propertyMeta, structureTypeGroup, structureType };
 	}
 
 	private doTransform_ArrayLike_determineEntryType(
@@ -346,8 +319,8 @@ export class TransformOperationExecutor {
 		targetStructure: ArrayLikeStructure
 	):PropertyTypeInfo {
 		let propertyType: any = undefined;
-		let structureType: TypedStructure|null = null;
-		if(subValue instanceof Map) structureType = TypedStructure.Map;
+		let structureTypeGroup: StructureTypeGroup|null = null;
+		if(subValue instanceof Map) structureTypeGroup = StructureTypeGroup.Map;
 
 		// TODO: how can targetType ever be TypeMetadata?
 		if (typeof c.targetType === "function") {
@@ -366,7 +339,7 @@ export class TransformOperationExecutor {
 			}
 		}
 
-		return { propertyType, structureType };
+		return { propertyType, structureTypeGroup };
 		
 	}
 

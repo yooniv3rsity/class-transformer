@@ -1,9 +1,32 @@
-import { TransformationType } from './enums';
-import { ObjectLikeStructure, TransformOperationArgs, TypeHelpOptions, TypeMetadata } from './interfaces';
+import { TransformationType, StructureTypeGroup } from './enums';
+import { ClassConstructor, ObjectLikeStructure, TransformOperationArgs, TypeHelpOptions, TypeMetadata } from './interfaces';
 import { defaultMetadataStorage } from './storage';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace TransformExecutionHelper {
+
+	export function determinestructureTypeGroup(value:any, metadata:TypeMetadata): StructureTypeGroup | null {
+		// TODO: unrealiable. we should not set expected structure type based on the incoming value.
+		// possibly this makes nested maps work, because if c.isMap is true, stuff will be skipped
+		// interestingly, no tests fail when commenting this out.
+		if(value instanceof Map) return StructureTypeGroup.Map;
+		else if (Array.isArray(value)) return StructureTypeGroup.Array;
+		return null;
+	}
+
+	export function getStructureType(structureTypeGroup:StructureTypeGroup|null, metadata:TypeMetadata): ClassConstructor<any>|null {
+		if(structureTypeGroup === StructureTypeGroup.Map) {
+			return Map;
+		} else if(structureTypeGroup === StructureTypeGroup.Set) {
+			return Set;
+		} else if(structureTypeGroup === StructureTypeGroup.Array) {
+			// if value is an array try to get its custom array type
+			// Note: In case of arrays, a custom prop named structureType will be passed in TransformOperationArgs.
+			if(metadata?.reflectedType) return metadata.reflectedType;
+			else return Array;
+		}
+		return null;
+	}
 
 	export function createTargetStructure( c:TransformOperationArgs, transformationType: TransformationType ): ObjectLikeStructure {
 		const {source, isMap, targetType} = c;
@@ -33,13 +56,11 @@ export namespace TransformExecutionHelper {
 	}
 
 	export function createArrayLike(c:TransformOperationArgs, transformationType: TransformationType): Array<any> | Set<any> {
-		const {arrayType} = c;
-		if(arrayType && transformationType === TransformationType.PLAIN_TO_CLASS) {
-			const array = new (arrayType as any)();
+		const structureType = c.structureType;
+		if(structureType && transformationType === TransformationType.PLAIN_TO_CLASS) {
+			const array = new (structureType as any)();
 			// fallback in case an incompatible constructor was set
-			if (!(array instanceof Set) && !(Array.isArray(array))) {
-				return [];
-			}
+			if (!(array instanceof Set) && !(Array.isArray(array))) return [];
 			return array;
 		} else {
 			return []

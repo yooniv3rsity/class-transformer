@@ -1,4 +1,4 @@
-export enum TypedStructure {
+export enum StructureTypeGroup {
 	Map = 'Map',
 	Set = 'Set',
 	Array = 'Array',

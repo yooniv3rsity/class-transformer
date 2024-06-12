@@ -53,6 +53,10 @@ export namespace TransformExecutionHelper {
 		}
 		return targetStructure;
 	}
+
+	export function isPrimitiveType(type:Function|undefined) {
+		return (type === String || type === Number || type === Boolean || type === BigInt)
+	}
 	
 	export function addPropertyToStructure( targetStructure: ObjectLikeStructure, newValueKey: string, newPropValue: any) {
 		if (targetStructure instanceof Map) {

@@ -115,7 +115,7 @@ describe('functionality implemented by YOOniversity', () => {
 	});
 
 	describe('@TypedStructure', () => {
-		it('Array should work', () => {
+		it('Array should work - with object', () => {
 
 			class UserData {
 				@Expose()
@@ -131,49 +131,312 @@ describe('functionality implemented by YOOniversity', () => {
 			}
 
 			// populate empty
-			expect(plainToInstance(User, {
-				name:'yoo',
-				data:[]
-			}, strictConfig)).toEqual({
+			const test1 = plainToInstance(User, {
+				name: 'yoo',
+				data: []
+			}, strictConfig);
+			expect(test1).toEqual({
+				name: 'yoo',
+				data: [],
+			});
+			expect(instanceToPlain(test1, strictConfig)).toEqual({
 				name: 'yoo',
 				data: [],
 			});
 
 			// skip
-			expect(plainToInstance(User, {
-				name:'yoo'
-			}, strictConfig)).toEqual({
+			const test2 = plainToInstance(User, {
 				name: 'yoo'
+			}, strictConfig);
+			expect(test2).toEqual({
+				name: 'yoo'
+			});
+			expect(instanceToPlain(test2, strictConfig)).toEqual({
+				name: 'yoo',
 			});
 
 			// populate data from plain
-			expect(plainToInstance(User, {
-				name:'yoo',
-				data:[{value:'abc'},{value:'def'},]
-			}, strictConfig)).toEqual({
+			const test3 = plainToInstance(User, {
+				name: 'yoo',
+				data: [{ value: 'abc' }, { value: 'def' },]
+			}, strictConfig);
+			expect(test3).toEqual({
 				name: 'yoo',
 				data: [{value:'abc'},{value:'def'},],
 			});
-			
+			expect(instanceToPlain(test3, strictConfig)).toEqual({
+				name: 'yoo',
+				data: [{value:'abc'}, {value:'def'}],
+			});
+
 			// ignore incoming data if of incorrect type
-			expect(plainToInstance(User, {
-				name:'yoo',
-				data:{value:'abc'},
-			}, strictConfig)).toEqual({
+			const test4 = plainToInstance(User, {
+				name: 'yoo',
+				data: { value: 'abc' },
+			}, strictConfig);
+			expect(test4).toEqual({
+				name: 'yoo',
+				data: [],
+			});
+			test4.data = {foo:'bar'} as any;
+			expect(instanceToPlain(test4, strictConfig)).toEqual({
 				name: 'yoo',
 				data: [],
 			});
 
 			// nested type works
-			expect(plainToInstance(User, {
-				name:'yoo',
-				data:[{value:'abc'},{name:'def'},]
-			}, strictConfig)).toEqual({
+			const test5 = plainToInstance(User, {
+				name: 'yoo',
+				data: [{ value: 'abc' }, { name: 'def' },]
+			}, strictConfig);
+			expect(test5).toEqual({
 				name: 'yoo',
 				data: [{value:'abc'},{},],
 			});
+			test5.data[1] = 'bsf' as any;
+			expect(instanceToPlain(test5, strictConfig)).toEqual({
+				name: 'yoo',
+				data: [{value:'abc'}, {}],
+			});
+
+		})
+		it('Array should work - with primitive', () => {
+
+			class User {
+				@Expose()
+				name: string;
+				
+				@Expose()
+				@TypedStructure(Array,()=>String)
+				data: string[];
+			}
+
+			// populate empty
+			const test1 = plainToInstance(User, {
+				name: 'yoo',
+				data: []
+			}, strictConfig);
+			expect(test1).toEqual({
+				name: 'yoo',
+				data: [],
+			});
+			expect(instanceToPlain(test1, strictConfig)).toEqual({
+				name: 'yoo',
+				data: [],
+			});
+
+			// skip
+			const test2 = plainToInstance(User, {
+				name: 'yoo'
+			}, strictConfig);
+			expect(test2).toEqual({
+				name: 'yoo'
+			});
+			expect(instanceToPlain(test2, strictConfig)).toEqual({
+				name: 'yoo',
+			});
+
+			// populate data from plain
+			const test3 = plainToInstance(User, {
+				name: 'yoo',
+				data: ['foo', 'bar']
+			}, strictConfig);
+			expect(test3).toEqual({
+				name: 'yoo',
+				data:['foo','bar']
+			});
+			expect(instanceToPlain(test3, strictConfig)).toEqual({
+				name: 'yoo',
+				data: ['foo','bar'],
+			});
+	
+			// ignore incoming data if of incorrect type
+			const test4 = plainToInstance(User, {
+				name: 'yoo',
+				data: { 'foo': 'bar' }
+			}, strictConfig);
+			expect(test4).toEqual({
+				name: 'yoo',
+				data: [],
+			});
+			test4.data = {foo:'bar'} as any;
+			expect(instanceToPlain(test4, strictConfig)).toEqual({
+				name: 'yoo',
+				data: [],
+			});
+
+			const test5 = plainToInstance(User, {
+				name: 'yoo',
+				data: ['foo', 333]
+			}, strictConfig);
+			// nested type works
+			expect(test5).toEqual({
+				name: 'yoo',
+				data: ['foo','333'],
+			});
+			test5.data = ['foo',123] as any;
+			expect(instanceToPlain(test5, strictConfig)).toEqual({
+				name: 'yoo',
+				data: ['foo','123'],
+			});
+
+		})
+
+		it('Set should work - with object', () => {
+
+			class UserData {
+				@Expose()
+				value:string;
+			}
+			class User {
+				@Expose()
+				name: string;
+				
+				@Expose()
+				@TypedStructure(Set,()=>UserData)
+				data: Set<UserData>;
+			}
+
+			// populate empty
+			const test1 = plainToInstance(User, {
+				name: 'yoo',
+				data: []
+			}, strictConfig);
+			expect(test1.data).toBeInstanceOf(Set)
+			expect(test1.data.size).toBe(0)
+			expect(instanceToPlain(test1, strictConfig)).toEqual({
+				name: 'yoo',
+				data: [],
+			});
+
+			// skip
+			const test2 = plainToInstance(User, {
+				name: 'yoo',
+			}, strictConfig);
+			expect(test2.data).toBeUndefined()
+			expect(instanceToPlain(test2, strictConfig)).toEqual({
+				name: 'yoo',
+			});
+
+			// populate data from plain
+			const test3 = plainToInstance(User, {
+				name: 'yoo',
+				data:[{value:'abc'},{value:'def'},]
+			}, strictConfig);
+			expect(test3.data).toBeInstanceOf(Set)
+			expect(test3.data.size).toBe(2)
+			expect(test3.data).toEqual(new Set([{value:'abc'},{value:'def'},]))
+			expect(instanceToPlain(test3, strictConfig)).toEqual({
+				name: 'yoo',
+				data: [{value:'abc'},{value:'def'}]
+			});
+			
+			// ignore incoming data if of incorrect type
+			const test4 = plainToInstance(User, {
+				name: 'yoo',
+				data:{value:'abc'}
+			}, strictConfig);
+			expect(test4.data).toBeInstanceOf(Set)
+			expect(test4.data.size).toBe(0)
+			test4.data = {test:123} as any;
+			expect(instanceToPlain(test4, strictConfig)).toEqual({
+				name: 'yoo',
+				data: []
+			});
+
+			// nested type works
+			const test5 = plainToInstance(User, {
+				name: 'yoo',
+				data:[{value:'abc'},{value:"123",test:123},]
+			}, strictConfig);
+			expect(test5.data).toBeInstanceOf(Set)
+			expect(test5.data.size).toBe(2)
+			expect(test5.data).toEqual(new Set([{value:'abc'},{value:"123"},]))
+			expect(instanceToPlain(test5, strictConfig)).toEqual({
+				name: 'yoo',
+				data: [{value:'abc'},{value:'123'}]
+			});
 	
 		})
+
+		it('Set should work - with primitive', () => {
+
+			class User {
+				@Expose()
+				name: string;
+				
+				@Expose()
+				@TypedStructure(Set,()=>String)
+				data: Set<string>;
+			}
+
+			// populate empty
+			const test1 = plainToInstance(User, {
+				name: 'yoo',
+				data: []
+			}, strictConfig);
+			expect(test1.data).toBeInstanceOf(Set);
+			expect(test1.data.size).toBe(0);
+			expect(instanceToPlain(test1, strictConfig)).toEqual({
+				name: 'yoo',
+				data: [],
+			});
+
+			// skip
+			const test2 = plainToInstance(User, {
+				name: 'yoo'
+			}, strictConfig);
+			expect(test2.data).toBeUndefined();
+			expect(instanceToPlain(test2, strictConfig)).toEqual({
+				name: 'yoo',
+			});
+
+			// populate data from plain
+			const test3 = plainToInstance(User, {
+				name: 'yoo',
+				data: ['foo', 'bar']
+			}, strictConfig);
+			expect(test3).toEqual({
+				name: 'yoo',
+				data:new Set(['foo','bar'])
+			});
+			expect(instanceToPlain(test3, strictConfig)).toEqual({
+				name: 'yoo',
+				data: ['foo','bar'],
+			});
+	
+			// ignore incoming data if of incorrect type
+			const test4 = plainToInstance(User, {
+				name: 'yoo',
+				data: { 'foo': 'bar' }
+			}, strictConfig);
+			expect(test4).toEqual({
+				name: 'yoo',
+				data: new Set([]),
+			});
+			test4.data = {foo:'bar'} as any;
+			expect(instanceToPlain(test4, strictConfig)).toEqual({
+				name: 'yoo',
+				data: [],
+			});
+
+			// nested type works
+			const test5 = plainToInstance(User, {
+				name: 'yoo',
+				data: ['foo', 333]
+			}, strictConfig);
+			expect(test5).toEqual({
+				name: 'yoo',
+				data: new Set(['foo','333']),
+			});
+			test5.data = ['foo',123] as any;
+			expect(instanceToPlain(test5, strictConfig)).toEqual({
+				name: 'yoo',
+				data: ['foo','123'],
+			});
+
+		})
+
 	})
 	
 	// TODO: test other custom functionality

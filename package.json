@@ -1,7 +1,7 @@
 {
   "name": "@yoolabs/class-transformer",
-  "version": "0.7.0",
-  "description": "Fork of the class-transformer package. Proper decorator-based transformation / serialization / deserialization of plain javascript objects to class constructors",
+  "version": "1.0.0",
+  "description": "Rewritten and improved fork of class-transformer",
   "author": "TypeStack contributors, Jannik Mewes (YOOniversity)",
   "license": "MIT",
   "readmeFilename": "README.md",

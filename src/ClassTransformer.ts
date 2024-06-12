@@ -52,7 +52,12 @@ export class ClassTransformer {
     options?: ClassTransformOptions
   ): T[];
   classToPlainFromExist<T extends Record<string, any>, P>(
-    object: T,
+    object: T[],
+    plainObjects: P[],
+    options?: ClassTransformOptions
+  ): T[];
+  classToPlainFromExist<T extends Record<string, any>, P>(
+    object: T | T[],
     plainObject: P | P[],
     options?: ClassTransformOptions
   ): T | T[] {
@@ -63,6 +68,17 @@ export class ClassTransformer {
         ...options,
       }
     );
+	if(Array.isArray(object) && Array.isArray(plainObject)) {
+		if(object.length !== plainObject.length) {
+			throw new Error('Merging many plain data into many instances is only supported if their count is matching!')
+		}
+		return object.map((objData, index) => {
+			return executor.transform({
+				source:plainObject[index] as any,
+				value:objData,
+			});
+		})
+	}
     return executor.transform({
       source:plainObject as any,
       value:object,
@@ -94,6 +110,7 @@ export class ClassTransformer {
         ...options,
       }
     );
+
     return executor.transform({
       value:plain,
       targetType:cls,

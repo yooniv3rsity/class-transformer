@@ -69,7 +69,12 @@ export function classToPlainFromExist<T>(
   options?: ClassTransformOptions
 ): Record<string, any>[];
 export function classToPlainFromExist<T>(
-  object: T,
+  object: T[],
+  plainObjects: Record<string, any>[],
+  options?: ClassTransformOptions
+): Record<string, any>[];
+export function classToPlainFromExist<T>(
+  object: T | T[],
   plainObject: Record<string, any> | Record<string, any>[],
   options?: ClassTransformOptions
 ): Record<string, any> | Record<string, any>[] {

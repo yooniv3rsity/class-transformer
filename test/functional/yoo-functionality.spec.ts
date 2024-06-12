@@ -576,7 +576,7 @@ describe('functionality implemented by YOOniversity', () => {
 			test4.data = [{foo:'bar'}] as any;
 			expect(instanceToPlain(test4, strictConfig)).toEqual({
 				name: 'yoo',
-				data: [],
+				data: {},
 			});
 
 			// nested type works
@@ -591,7 +591,7 @@ describe('functionality implemented by YOOniversity', () => {
 			test5.data = new Map<string,any>([['foo','test'], ['bar',123]]);
 			expect(instanceToPlain(test5, strictConfig)).toEqual({
 				name: 'yoo',
-				data: new Map([['foo','test'], ['bar','123']]),
+				data: {foo:'test',bar:'123'},
 			});
 
 		})

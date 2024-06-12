@@ -50,7 +50,7 @@ export class TransformOperationExecutor {
 
 	// recursive/nested transformation uses separate method
 	nestedTransform(c:TransformOperationArgs): any {
-		console.log('>>> nestedTransform',c)
+		// console.log('>>> nestedTransform',c)
 		if (this.options.transformationHandler) {
 			return this.options.transformationHandler( c, this );
 		} else {
@@ -59,6 +59,13 @@ export class TransformOperationExecutor {
 	}
 	
 	doTransform(c:TransformOperationArgs): any {
+		// check and handle special case: executor may receive an array of plain values to transform.
+		// in this case, the structureType must be forced to Array.
+		if(c.level === 0 && Array.isArray(c.value)) {
+			c.structureType = Array;
+			return this.doTransform_structure(c)
+		}
+
 		const { value, targetType, isMap, structureType} = c;
 		// Note: order of checks is important! multiple checks can be truthy!
 		if(value === null || value === undefined) {
@@ -91,18 +98,30 @@ export class TransformOperationExecutor {
 	}
 
 	private doTransform_structure(c:TransformOperationArgs): any {
-		const { value, isMap} = c;
-		if (Array.isArray(value) || value instanceof Set) {
-			return this.doTransform_ArrayLike( c );
-		} else if (typeof value === "object" || c.targetType) {
-			if ( !isMap && typeof value.then === "function" ) {
-				// Note: Never happens because promises have already been handled above.
-				// This option simply returns the Promise preventing a JS error from happening and should be an inaccessible path.
-				return value; // skip promise transformation
+		const { value, isMap, structureType} = c;
+		// console.log('transform structure', structureType, value)
+		if(structureType) {
+			const group = TransformExecutionHelper.getStructureTypeGroup(structureType)
+			// use explicit type handling based on structureType info
+			if(group === StructureTypeGroup.Array || group === StructureTypeGroup.Set ) {
+				return this.doTransform_ArrayLike(c);
+			} else {
+				return this.doTransform_objectLike(c);
 			}
-			return this.doTransform_objectLike(c);
-		}  else {
-			return value;
+		} else {
+			// use implicit type guessing based on value
+			if (Array.isArray(value) || value instanceof Set) {
+				return this.doTransform_ArrayLike(c);
+			} else if (typeof value === "object" || c.targetType) {
+				if ( !isMap && typeof value.then === "function" ) {
+					// Note: Never happens because promises have already been handled above.
+					// This option simply returns the Promise preventing a JS error from happening and should be an inaccessible path.
+					return value; // skip promise transformation
+				}
+				return this.doTransform_objectLike(c);
+			}  else {
+				return value;
+			}
 		}
 	}
 
@@ -292,7 +311,7 @@ export class TransformOperationExecutor {
 			const validSourceValue = !value || Array.isArray(value) || (value instanceof Set);
 			if(!validSourceValue) return []
 		} else if(typeGroup === StructureTypeGroup.Map ||typeGroup === StructureTypeGroup.Object) {
-			const validSourceValue = !value || (value instanceof Map) || (typeof value === 'object');
+			const validSourceValue = !value || (value instanceof Map) || (typeof value === 'object') && !Array.isArray(value);
 			if(!validSourceValue) return {}
 		}
 

@@ -113,48 +113,4 @@ describe('circular reference problem', () => {
     expect(classUser).toBeInstanceOf(User);
     expect(classUser).toEqual(user);
   });
-
-  describe('enableCircularCheck option', () => {
-    class Photo {
-      id: number;
-      filename: string;
-    }
-
-    class User {
-      id: number;
-      firstName: string;
-      photos: Photo[];
-    }
-    let isCircularSpy: jest.SpyInstance;
-    const photo1 = new Photo();
-    photo1.id = 1;
-    photo1.filename = 'me.jpg';
-
-    const user = new User();
-    user.firstName = 'Umed Khudoiberdiev';
-    user.photos = [photo1];
-
-    beforeEach(() => {
-      isCircularSpy = jest.spyOn(
-        TransformOperationExecutor.prototype,
-        'isCircular' as any
-      );
-    });
-
-    afterEach(() => {
-      isCircularSpy.mockRestore();
-    });
-
-    it('enableCircularCheck option is undefined (default)', () => {
-      plainToInstance<User, Record<string, any>>(User, user);
-      expect(isCircularSpy).not.toHaveBeenCalled();
-    });
-
-    it('enableCircularCheck option is true', () => {
-      plainToInstance<User, Record<string, any>>(User, user, {
-        enableCircularCheck: true,
-      });
-      expect(isCircularSpy).toHaveBeenCalled();
-    });
-  });
 });

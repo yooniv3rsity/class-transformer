@@ -1,16 +1,8 @@
 import { TransformOperationExecutor } from '../TransformOperationExecutor';
-import { TypeMetadata } from './metadata/type-metadata.interface';
+import { TransformOperationArgs } from './transform-operation-args.interface';
 
-interface ExecuteTransformationArguments {
-  source: Record<string, any> | Record<string, any>[] | any;
-  value: Record<string, any> | Record<string, any>[] | any;
-  targetType: Function | TypeMetadata;
-  arrayType: Function;
-  isMap: boolean;
-  level: number;
-}
 
 export type ExecuteTransformationHandler = (
-  transformArguments: ExecuteTransformationArguments,
+  transformArguments: TransformOperationArgs,
   executor: TransformOperationExecutor
 ) => any;

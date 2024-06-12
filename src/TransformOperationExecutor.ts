@@ -50,7 +50,7 @@ export class TransformOperationExecutor {
 
 	// recursive/nested transformation uses separate method
 	nestedTransform(c:TransformOperationArgs): any {
-		// console.log('>>> nestedTransform',c)
+		console.log('>>> nestedTransform',c)
 		if (this.options.transformationHandler) {
 			return this.options.transformationHandler( c, this );
 		} else {
@@ -83,7 +83,7 @@ export class TransformOperationExecutor {
 			return new Date(value);
 		} else if (!!getGlobal().Buffer && (targetType === Buffer || value instanceof Buffer) && !isMap && !structureType ) {
 			return Buffer.from(value);
-		} else if (typeof value === "object") {
+		} else if (typeof value === "object" || targetType) {
 			return this.doTransform_structure(c)
 		}  else {
 			return value;
@@ -91,11 +91,10 @@ export class TransformOperationExecutor {
 	}
 
 	private doTransform_structure(c:TransformOperationArgs): any {
-		// console.log('doTransform_structure',c.value)
 		const { value, isMap} = c;
 		if (Array.isArray(value) || value instanceof Set) {
 			return this.doTransform_ArrayLike( c );
-		} else if (typeof value === "object") {
+		} else if (typeof value === "object" || c.targetType) {
 			if ( !isMap && typeof value.then === "function" ) {
 				// Note: Never happens because promises have already been handled above.
 				// This option simply returns the Promise preventing a JS error from happening and should be an inaccessible path.
@@ -172,7 +171,6 @@ export class TransformOperationExecutor {
 		const newArrayLike = TransformExecutionHelper.createArrayLike(c,this.transformationType);
 
 		const arrayValue = this.ensureCorrectValueType(c.value, c.structureType);
-		// console.log('transform array', c.structureType, c.targetType, c.typeMetadata, arrayValue, newArrayLike);
 		(arrayValue as any[]).forEach((subValue, index) => {
 			subValue = this.ensureCorrectValueType(subValue, c.targetType as any);
 			if (!this.recursionStack.has(subValue)) {
@@ -282,7 +280,6 @@ export class TransformOperationExecutor {
 	// - a Primitive Type like String, Number
 	// - a custom class constructor
 	private ensureCorrectValueType(value:any, type: ClassConstructor<any>|Function|undefined):any {
-		// if(!structureType) console.log('ensureCorrectValueType - no structureType given.',structureType, value)
 		if(!type) {
 			return value;
 		} else if(TransformExecutionHelper.isPrimitiveType(type)) {
@@ -293,11 +290,9 @@ export class TransformOperationExecutor {
 
 		if(typeGroup === StructureTypeGroup.Array ||typeGroup === StructureTypeGroup.Set) {
 			const validSourceValue = !value || Array.isArray(value) || (value instanceof Set);
-			// console.log('ensureCorrectValueType ArrayLike', value, 'valid?', validSourceValue)
 			if(!validSourceValue) return []
 		} else if(typeGroup === StructureTypeGroup.Map ||typeGroup === StructureTypeGroup.Object) {
 			const validSourceValue = !value || (value instanceof Map) || (typeof value === 'object');
-			// console.log('ensureCorrectValueType ObjectLike', value, 'valid?', validSourceValue)
 			if(!validSourceValue) return {}
 		}
 
@@ -334,7 +329,6 @@ export class TransformOperationExecutor {
 		} 
 
 		if (metadata) {
-			// console.log('>>>>>> metadata for '+targetTypePropertyName,metadata)
 			const typeHelpOpts: TypeHelpOptions = this.createTypeHelpOptions(targetStructure, c.value, targetTypePropertyName);
 			const useDiscriminator = metadata?.options?.discriminator?.property && metadata.options.discriminator.subTypes;
 			
@@ -385,7 +379,6 @@ export class TransformOperationExecutor {
 
 		}
 				
-		// console.log('Type info for prop '+targetTypePropertyName+':', { propertyType, propertyMeta, structureTypeGroup, structureType })
 		return { propertyType, propertyMeta, structureTypeGroup, structureType };
 	}
 

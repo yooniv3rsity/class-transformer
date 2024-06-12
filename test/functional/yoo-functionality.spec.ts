@@ -437,6 +437,165 @@ describe('functionality implemented by YOOniversity', () => {
 
 		})
 
+
+		it('Map should work - with object', () => {
+
+			class UserData {
+				@Expose()
+				value:string;
+			}
+			class User {
+				@Expose()
+				name: string;
+				
+				@Expose()
+				@TypedStructure(Map,()=>UserData)
+				data: Map<string,UserData>;
+			}
+
+			// populate empty
+			const test1 = plainToInstance(User, {
+				name: 'yoo',
+				data: {}
+			}, strictConfig);
+			expect(test1.data).toBeInstanceOf(Map)
+			expect(test1.data.size).toBe(0)
+			expect(instanceToPlain(test1, strictConfig)).toEqual({
+				name: 'yoo',
+				data: {},
+			});
+
+			// skip
+			const test2 = plainToInstance(User, {
+				name: 'yoo',
+			}, strictConfig);
+			expect(test2.data).toBeUndefined()
+			expect(instanceToPlain(test2, strictConfig)).toEqual({
+				name: 'yoo',
+			});
+
+			// populate data from plain
+			const test3 = plainToInstance(User, {
+				name: 'yoo',
+				data:{'foo':{value:'abc'},'bar':{value:'def'}}
+			}, strictConfig);
+			expect(test3.data).toBeInstanceOf(Map)
+			expect(test3.data.size).toBe(2)
+			expect(test3.data).toEqual(new Map([['foo',{value:'abc'}],['bar',{value:'def'}]]))
+			expect(instanceToPlain(test3, strictConfig)).toEqual({
+				name: 'yoo',
+				data:{'foo':{value:'abc'},'bar':{value:'def'}}
+			});
+			
+			// ignore incoming data if of incorrect type
+			// NOTE: Behavior is not ideal, but in plain state object and map are identical, 
+			// so theres no possiblity to distinguish them
+			const test4 = plainToInstance(User, {
+				name: 'yoo',
+				data:{value:'abc'}
+			}, strictConfig);
+			expect(test4.data).toBeInstanceOf(Map)
+			expect(test4.data.size).toBe(1)
+			expect(test4.data).toEqual(new Map([['value',{}]]))
+			test4.data = {test:123} as any;
+			expect(instanceToPlain(test4, strictConfig)).toEqual({
+				name: 'yoo',
+				data: {test:{}}
+			});
+
+			// nested type works
+			const test5 = plainToInstance(User, {
+				name: 'yoo',
+				data:{'foo':{value:'abc'},'bar':{value:'def',test:11}}
+			}, strictConfig);
+			expect(test5.data).toBeInstanceOf(Map)
+			expect(test5.data.size).toBe(2)
+			expect(test5.data).toEqual(new Map([['foo',{value:'abc'}],['bar',{value:'def'}]]))
+			expect(instanceToPlain(test5, strictConfig)).toEqual({
+				name: 'yoo',
+				data:{'foo':{value:'abc'},'bar':{value:'def'}}
+			});
+	
+		})
+
+		it('Map should work - with primitive', () => {
+
+			class User {
+				@Expose()
+				name: string;
+				
+				@Expose()
+				@TypedStructure(Map,()=>String)
+				data: Map<string,string>;
+			}
+
+			// populate empty
+			const test1 = plainToInstance(User, {
+				name: 'yoo',
+				data: {}
+			}, strictConfig);
+			expect(test1.data).toBeInstanceOf(Map);
+			expect(test1.data.size).toBe(0);
+			expect(instanceToPlain(test1, strictConfig)).toEqual({
+				name: 'yoo',
+				data: {},
+			});
+
+			// skip
+			const test2 = plainToInstance(User, {
+				name: 'yoo'
+			}, strictConfig);
+			expect(test2.data).toBeUndefined();
+			expect(instanceToPlain(test2, strictConfig)).toEqual({
+				name: 'yoo',
+			});
+
+			// populate data from plain
+			const test3 = plainToInstance(User, {
+				name: 'yoo',
+				data: {'foo':'abc','bar':'def'}
+			}, strictConfig);
+			expect(test3).toEqual({
+				name: 'yoo',
+				data:new Map([['foo','abc'],['bar','def']])
+			});
+			expect(instanceToPlain(test3, strictConfig)).toEqual({
+				name: 'yoo',
+				data: {'foo':'abc','bar':'def'},
+			});
+	
+			// ignore incoming data if of incorrect type
+			const test4 = plainToInstance(User, {
+				name: 'yoo',
+				data: ['foo','bar']
+			}, strictConfig);
+			expect(test4).toEqual({
+				name: 'yoo',
+				data: new Map(),
+			});
+			test4.data = [{foo:'bar'}] as any;
+			expect(instanceToPlain(test4, strictConfig)).toEqual({
+				name: 'yoo',
+				data: [],
+			});
+
+			// nested type works
+			const test5 = plainToInstance(User, {
+				name: 'yoo',
+				data: {foo:'test',bar:123}
+			}, strictConfig);
+			expect(test5).toEqual({
+				name: 'yoo',
+				data: new Map([['foo','test'], ['bar','123']]),
+			});
+			test5.data = new Map<string,any>([['foo','test'], ['bar',123]]);
+			expect(instanceToPlain(test5, strictConfig)).toEqual({
+				name: 'yoo',
+				data: new Map([['foo','test'], ['bar','123']]),
+			});
+
+		})
+
 	})
 	
 	// TODO: test other custom functionality

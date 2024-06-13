@@ -14,6 +14,10 @@
 This fork adds custom functionality to class transformer.
 Note: To release to npm, run continuous-deployment-workflow!
 
+### 1.0.1
+
+- [Structure Decorator](#structure-decorator) enhancement: Support Map/Set being passed in plain value (plain data only supported Array+Object until now)
+
 ### 1.0
 
 - Restructure code and fix many lint and possibly edge case runtime errors
@@ -41,6 +45,7 @@ This tool is super useful on both frontend and backend.
 ## Table of contents
 
 * [yoolabs class-transformer](#yoolabs-class-transformer)
+	* [1.0.1](#101)
 	* [1.0](#10)
 	* [0.7](#07)
 * [Main Introduction](#main-introduction)

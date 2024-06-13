@@ -169,6 +169,20 @@ describe('functionality implemented by YOOniversity', () => {
 				data: [{value:'abc'}, {value:'def'}],
 			});
 
+			// populate data from plain
+			const test3b = plainToInstance(User, {
+				name: 'yoo',
+				data: new Set([{ value: 'abc' }, { value: 'def' },])
+			}, strictConfig);
+			expect(test3b).toEqual({
+				name: 'yoo',
+				data: [{value:'abc'},{value:'def'},],
+			});
+			expect(instanceToPlain(test3b, strictConfig)).toEqual({
+				name: 'yoo',
+				data: [{value:'abc'}, {value:'def'}],
+			});
+
 			// ignore incoming data if of incorrect type
 			const test4 = plainToInstance(User, {
 				name: 'yoo',
@@ -404,6 +418,20 @@ describe('functionality implemented by YOOniversity', () => {
 				name: 'yoo',
 				data: ['foo','bar'],
 			});
+
+			// populate data from plain Set
+			const test3b = plainToInstance(User, {
+				name: 'yoo',
+				data: new Set(['foo', 'bar'])
+			}, strictConfig);
+			expect(test3b).toEqual({
+				name: 'yoo',
+				data:new Set(['foo','bar'])
+			});
+			expect(instanceToPlain(test3b, strictConfig)).toEqual({
+				name: 'yoo',
+				data: ['foo','bar'],
+			});
 	
 			// ignore incoming data if of incorrect type
 			const test4 = plainToInstance(User, {
@@ -483,6 +511,19 @@ describe('functionality implemented by YOOniversity', () => {
 			expect(test3.data.size).toBe(2)
 			expect(test3.data).toEqual(new Map([['foo',{value:'abc'}],['bar',{value:'def'}]]))
 			expect(instanceToPlain(test3, strictConfig)).toEqual({
+				name: 'yoo',
+				data:{'foo':{value:'abc'},'bar':{value:'def'}}
+			});
+
+			// populate data from plain with Map
+			const test3b = plainToInstance(User, {
+				name: 'yoo',
+				data:new Map([['foo',{value:'abc'}],['bar',{value:'def'}]])
+			}, strictConfig);
+			expect(test3b.data).toBeInstanceOf(Map)
+			expect(test3b.data.size).toBe(2)
+			expect(test3b.data).toEqual(new Map([['foo',{value:'abc'}],['bar',{value:'def'}]]))
+			expect(instanceToPlain(test3b, strictConfig)).toEqual({
 				name: 'yoo',
 				data:{'foo':{value:'abc'},'bar':{value:'def'}}
 			});

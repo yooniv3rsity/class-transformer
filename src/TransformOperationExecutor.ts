@@ -132,19 +132,15 @@ export class TransformOperationExecutor {
 		this.recursionStack.add(c.value);
 		c.value = this.ensureCorrectValueType(c.value, c.structureType);
 
-		// @yoolabs/class-transformer modification: Pass level int to getKeys
 		const keys = this.getKeys(c);
 		const targetStructure = TransformExecutionHelper.createTargetStructure(c, this.transformationType);
 
 		// returns a structure's property value or its return value in case it is a function
 		const getSubValueFromStructure = (structure: ObjectLikeStructure, propKey: string, transformationType:TransformationType) => {
-			let subValue: any = undefined;
-			if (transformationType === TransformationType.PLAIN_TO_CLASS) {
-				// no calling of constructor/function in plain to class!
-				// see https://github.com/typestack/class-transformer/issues/596
-				subValue = structure[propKey];
-			} else {
-				subValue = TransformExecutionHelper.getPropertyFromStructure(structure, propKey)
+			let subValue: any = TransformExecutionHelper.getPropertyFromStructure(structure, propKey);
+			// no calling of constructor/function in plain to class!
+			// see https://github.com/typestack/class-transformer/issues/596
+			if (transformationType !== TransformationType.PLAIN_TO_CLASS) {
 				// execute function bound to object! -> value[valueKey]()
 				if (subValue instanceof Function) subValue = structure[propKey]();
 			}

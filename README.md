@@ -12,6 +12,7 @@
 ## yoolabs class-transformer
 
 This fork adds custom functionality to class transformer.
+Note: To release to npm, run continuous-deployment-workflow!
 
 ### 1.0
 

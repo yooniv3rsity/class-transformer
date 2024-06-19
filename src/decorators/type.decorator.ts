@@ -40,7 +40,8 @@ export function Structure(
 		defaultMetadataStorage.addTypeMetadata({
 			target: target.constructor,
 			propertyName: propertyName as string,
-			reflectedType: null,
+			// assigning ctor to reflectedType as well helps with compatibility of 3rd party libs.
+			reflectedType: structureType, 
 			structureType,
 			typeFunction,
 			options,

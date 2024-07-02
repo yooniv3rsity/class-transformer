@@ -1,6 +1,6 @@
 {
   "name": "@yoolabs/class-transformer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Rewritten and improved fork of class-transformer",
   "author": "TypeStack contributors, Jannik Mewes (YOOniversity)",
   "license": "MIT",

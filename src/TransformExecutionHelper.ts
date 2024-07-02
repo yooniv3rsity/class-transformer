@@ -46,12 +46,23 @@ export namespace TransformExecutionHelper {
 			if (isMap) {
 				targetStructure = new Map();
 			} else if (targetType) {
-				targetStructure = new (targetType as any)();
+				targetStructure = es2022Fix(new (targetType as any)());
 			} else {
 				targetStructure = {};
 			}
 		}
 		return targetStructure;
+	}
+
+	// es2022 introduces a new behavior resulting in behavior change.
+	// all class props will be initialized to undefined instead of being "not defined at all"
+	// this helper will remove these props to ensure explicit property exposure continues to work.
+	// https://github.com/typestack/class-transformer/issues/1216
+	function es2022Fix<T extends object>(instance:T):T {
+		for (const key of Object.keys(instance)) {
+			delete instance[key];
+		}
+		return instance
 	}
 
 	export function isPrimitiveType(type:Function|undefined) {

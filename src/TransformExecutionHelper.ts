@@ -57,10 +57,14 @@ export namespace TransformExecutionHelper {
 	// es2022 introduces a new behavior resulting in behavior change.
 	// all class props will be initialized to undefined instead of being "not defined at all"
 	// this helper will remove these props to ensure explicit property exposure continues to work.
+	// the fix introduces a minimal behavior change on its own:
+	// when initializing a property to undefined manually ( ctor: this.myProp = undefined ),
+	// it will be deleted (which makes no difference in 99% of cases). 
+	// All property initializers !== undefined will work correctly.
 	// https://github.com/typestack/class-transformer/issues/1216
 	function es2022Fix<T extends object>(instance:T):T {
 		for (const key of Object.keys(instance)) {
-			delete instance[key];
+			if(instance[key] === undefined) delete instance[key];
 		}
 		return instance
 	}
